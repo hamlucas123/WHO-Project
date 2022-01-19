@@ -2,6 +2,7 @@
 
 library(dplyr)
 library(tidyr)
+library(readr)
 
 df <- read.csv('data/country-level-predictors.csv')
 
@@ -20,7 +21,14 @@ colnames(df)[1] <- "Country.Name"
 # select base columns
 df <- df[c("Country.Name","Country.Code","Series.Name", "value")]
 
+# See unique category names
+categories <- unique(df$Series.Name) 
+
+# Remove empty 5 last rows
+df <- slice(df, 1:(n()-5))
+
+# Pivot dataframe
+df <- df %>% pivot_wider(names_from = Series.Name, values_from = value)
 
 
 
-# df$lastval <- as.numeric(df$lastval)

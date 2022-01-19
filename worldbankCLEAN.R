@@ -4,7 +4,7 @@ library(dplyr)
 library(tidyr)
 library(readr)
 
-df <- read.csv('/Users/Haj/Documents/Health Data Science/Modules II/WHO-Project/data/country-level-predictors.csv')
+df <- read.csv('data/country-level-predictors.csv')
 
 # replacing all ".." with NA
 df[df==".."] <- NA

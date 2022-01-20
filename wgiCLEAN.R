@@ -24,11 +24,11 @@ euro_count <- c("Albania", "Andorra", "Armenia", "Austria", "Azerbaijan",
                 "Ukraine", "United Kingdom", "Uzbekistan")
 
 
-gov_eff_eur <- gov_eff[is.element(gov_eff$...1,euro_count),]
-gov_count <- gov_eff_eur$'...1'
-gov_eff_eur[gov_eff_eur =='#N/A'] <- NA
+gov_eff <- gov_eff[is.element(gov_eff$...1,euro_count),]
+gov_count <- gov_eff$'...1'
+gov_eff[gov_eff =='#N/A'] <- NA
 
-gov_count[is.na(gov_eff_eur$'2020...129')] #no data for Monaco and San Marino
+gov_count[is.na(gov_eff$'2020...129')] #no data for Monaco and San Marino
 
-gov_eff_eur <- gov_eff_eur[,c(1,129:134)] #select only 2020 scores
-colnames(gov_eff_eur) <-  c('Country', 'Estimate','StdErr','NumSrc','Rank','Lower','Upper') #rename columns
+gov_eff <- gov_eff[,c(1:2,129:134)] #select only 2020 scores
+colnames(gov_eff) <-  c('Country','Code', 'Estimate','StdErr','NumSrc','Rank','Lower','Upper') #rename columns

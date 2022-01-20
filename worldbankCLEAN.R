@@ -114,3 +114,21 @@ summary(as.numeric(unlist(df[,17])))
 
 summary(as.numeric(unlist(df[,18])))
 #3 missing for refugee population
+
+# Change columns to numeric
+df[,3:18] <- sapply(df[,3:18],as.numeric)
+
+### KOSOVO
+# Health expenditure: 3.5% of GDP in 2019
+# GDP in 2019: 7.9 Billion USD
+# GDP Per Capita in 2019: 4,416.108
+# Health expenditure per capita:
+
+df$`Health expenditure per capita (current US $)`[df$Country == "Kosovo"] <- 0.035 * 4416.108
+
+### LIECHTENSTEIN
+# 1.1199 average exchange rate in 2019 (Euros to USD) 
+# Health expenditure per capita in 2019: 9136.24 euros
+# Result makes sense because Liechtenstein and Switzerland always have top 2 in health expenditure
+
+df$`Health expenditure per capita (current US $)`[df$Country == "Liechtenstein"] <- 9136.24 * 1.1199

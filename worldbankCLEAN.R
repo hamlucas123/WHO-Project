@@ -132,3 +132,39 @@ df$`Health expenditure per capita (current US $)`[df$Country == "Kosovo"] <- 0.0
 # Result makes sense because Liechtenstein and Switzerland always have top 2 in health expenditure
 
 df$`Health expenditure per capita (current US $)`[df$Country == "Liechtenstein"] <- 9136.24 * 1.1199
+
+### Replace CPIA Gender Equality Rating with Gender Inequality Index (GII) (2019)
+gender <- read_excel('data/gender-inequality.xlsx', skip=7)
+
+# Select 2nd and 3rd column
+gender <- gender[, 2:3]
+
+# Change Column names
+colnames(gender) <- c("Country", "Gender Inequality Index (GII)")
+
+# Round values to 3 decimal places
+gender[,2] <- sapply(gender[,2], as.numeric)
+
+# Filter by countries we want
+gender <- subset(gender, Country %in% df$Country)
+
+# Join gender with larger dataframe
+df <- merge(df, gender, by.x = "Country", 
+                   by.y = "Country", all.x = TRUE, all.y = FALSE)
+
+# Drop CPIA Gender Equality
+df$`CPIA gender equality rating (1=low to 6=high)` <- NULL
+
+# missing values
+# Czech Republic: 0.136
+df$`Gender Inequality Index (GII)`[df$Country == "Czech Republic"] <- 0.136
+
+# Kyrgyz Republic: 0.369
+df$`Gender Inequality Index (GII)`[df$Country == "Kyrgyz Republic"] <- 0.369
+
+# Moldova: 0.204
+df$`Gender Inequality Index (GII)`[df$Country == "Moldova"] <- 0.204
+
+# Slovak Republic: 0.191
+df$`Gender Inequality Index (GII)`[df$Country == "Slovak Republic"] <- 0.191
+

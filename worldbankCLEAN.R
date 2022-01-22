@@ -3,6 +3,8 @@
 library(dplyr)
 library(tidyr)
 library(readr)
+library(readxl)
+
 
 df <- read.csv('data/country-level-predictors.csv')
 
@@ -167,4 +169,33 @@ df$`Gender Inequality Index (GII)`[df$Country == "Moldova"] <- 0.204
 
 # Slovak Republic: 0.191
 df$`Gender Inequality Index (GII)`[df$Country == "Slovak Republic"] <- 0.191
+
+# Replace literacy rates
+literacy <- read.csv('data/cross-country-literacy-rates.csv')
+
+# Get latest literacy values
+literacy <- literacy %>% 
+  group_by(Entity) %>%
+  slice(which.max(Year))
+
+# Merge new literacy values
+df <- merge(df, literacy, by.x = "Country", 
+            by.y = "Entity", all.x = TRUE, all.y = FALSE)
+
+# Fills NAs with more complete dataset values
+df$`Adult Literacy rate (% of people ages 15 and above)` <- ifelse(is.na(df$`Adult Literacy rate (% of people ages 15 and above)`),
+                                                                   df$Literacy.rates..World.Bank..CIA.World.Factbook..and.other.sources.,
+                                                                   df$`Adult Literacy rate (% of people ages 15 and above)`)
+
+# missing values for literacy
+# Czech Republic: 99.00000
+df$`Adult Literacy rate (% of people ages 15 and above)`[df$Country == "Czech Republic"] <- 99
+
+# Slovak Republic: 99.60000
+df$`Adult Literacy rate (% of people ages 15 and above)`[df$Country == "Slovak Republic"] <- 99.6
+
+# Drop unwanted columns
+df$Code <- NULL
+df$Year <- NULL
+df$Literacy.rates..World.Bank..CIA.World.Factbook..and.other.sources. <- NULL
 

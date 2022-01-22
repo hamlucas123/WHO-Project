@@ -53,7 +53,7 @@ length(which(missing$Entity == 'Turkmenistan'))
 missing <- missing[c(1:7,346:353),]
 
 #aggregate csi score
-with(csi, csi[(Day >= '2021-12-24') & (Day <='2021-12-31'),]
+csi <- with(csi, csi[(Day >= '2021-12-24') & (Day <='2021-12-31'),])
 aggr <- aggregate(stringency_index~Entity+Code, data = csi, FUN = mean)
 aggr_missing <- aggregate(stringency_index~Entity+Code, data = missing, FUN = mean)
 csi <- rbind(aggr, aggr_missing)

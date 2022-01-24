@@ -60,3 +60,4 @@ euro_count_dict$`Other Name Variations1` <-ifelse(!(euro_count_dict$Country==eui
                                                     !(euro_count_dict$`Other Name Variations`==euiso2_code$Definition), 
                                                   paste(euiso2_code$Definition), NA)
 
+save(euro_count_dict, file=("data/euro_count_dict.csv"))

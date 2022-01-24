@@ -84,12 +84,21 @@ eu_vaccines_cum_all <- mutate(eu_vaccines_cum_all,
                               NumberDosesAvailable = NumberDosesReceived - NumberDosesExported,
                               Percent_atleast_onedose = FirstDose / Population,
                               #People vaccinated with JJ count towards fully vaccinated
-                              Percent_fully_vaccinated = (SecondDose + FirstDoseJJ) / Population)
+                              Percent_fully_vaccinated = (SecondDose + FirstDoseJJ) / Population,
+                              Percent_boosted = DoseAdditional1 / Population)
 
 #Sweden is missing the Percent_fully_vaccinated variable because it is missing the FirstDoseJJ variable
 #as sweden didn't use JJ vaccines and has not mentioned JJ in the target group 
 #Calculating this value for sweden 
+eu_vaccines_cum_all[eu_vaccines_cum_all$ReportingCountry == 'SE', "Percent_fully_vaccinated"] <-
+eu_vaccines_cum_all[eu_vaccines_cum_all$ReportingCountry == 'SE', "SecondDose"] / 
+eu_vaccines_cum_all[eu_vaccines_cum_all$ReportingCountry == 'SE', "Population"]
 
+#Number of doses available for Malta ('MT') is negative as they had values only number of doses exported but 
+#not for the number of doses received (the calculated Number of doses was -341380)
+#Replacing this value with NA
+
+eu_vaccines_cum_all[eu_vaccines_cum_all$ReportingCountry == 'MT', "NumberDosesAvailable"] <- NA
 
 #I have checked the % of fully vaccinated people with the EU CDC interactive dashboard of COVID vaccinations
 #and found the values calculated in eu_vaccines_cum_all to be matching satisfactorily 

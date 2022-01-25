@@ -171,7 +171,7 @@ eu_vaccines_cum_hcw <- rename(eu_vaccines_cum_hcw, unknown_dose_hcw = UnknownDos
 #Dataframe holding populations of the LTCF residents among the EU countries that mention it
 eu_ltcf_populations <- eu_vaccines %>% filter(TargetGroup == 'LTCF') %>%
   group_by(ReportingCountry) %>%
-  #Each of the countries have only one unique value of the denominator for the HCW group 
+  #Each of the countries have only one unique value of the denominator for the LTCF group 
   summarise(ltcf_population = max(Denominator)) 
 
 #We want data for LTCF residents with cumulative doses received, exported, 
@@ -232,4 +232,91 @@ eu_vaccines_cum_ltcf <- select(eu_vaccines_cum_ltcf,-c("FirstDose","SecondDose",
                                                      "FirstDoseJJ_ltcf"))
 
 eu_vaccines_cum_ltcf <- rename(eu_vaccines_cum_ltcf, unknown_dose_ltcf = UnknownDose)
-                         
+
+##For vaccination statistics in those aged >60:
+
+#Dataframe holding populations of the individuals aged > 60 among the EU countries that mention it
+eu_above60_populations <- eu_vaccines %>% filter(TargetGroup %in% c("Age60_69","Age70_79","Age80+" )) %>%
+  group_by(ReportingCountry, TargetGroup) %>%
+  #Each of the countries have only one unique value of the denominator for each of the target groups 
+  summarise(above60_population = (max(Denominator))) %>% 
+  group_by(ReportingCountry) %>%
+  summarise(above60_population = sum(above60_population))
+
+#We want data for individuals above 60 residents with cumulative doses received, exported, 
+#first dose, second dose, doseadditional1, and unknowndoses given as of 2021-W52
+
+eu_vaccines_cum_above60 <- eu_vaccines %>% filter(TargetGroup %in% c("Age60_69","Age70_79","Age80+")) %>%
+  group_by(ReportingCountry) %>%
+  summarise_at(.vars = vars(FirstDose,SecondDose,DoseAdditional1,UnknownDose),
+               .funs = sum, na.rm = T)
+
+eu_vaccines_cum_above60 <- inner_join(eu_vaccines_cum_above60, eu_above60_populations, by = "ReportingCountry")
+
+#Dataframe holding cumulative first doses of JJ vaccine given to above 60 people as of 2021-W52
+JJ_doses_cum_above60 <- eu_vaccines %>% 
+  filter(Vaccine == 'JANSS') %>%
+  filter(TargetGroup %in% c("Age60_69","Age70_79","Age80+" )) %>% 
+  group_by(ReportingCountry) %>%
+  summarise(FirstDoseJJ_above60 = sum(FirstDose),na.rm = T)
+
+#Adding a column on first doses of JJ vaccine given to above 60 people to the eu_vaccines_cum_above60 df
+eu_vaccines_cum_above60 <- left_join(eu_vaccines_cum_above60, JJ_doses_cum_above60, by = "ReportingCountry")
+
+#Calculating %s for eu_vaccines_cum_above60
+eu_vaccines_cum_above60 <- mutate(eu_vaccines_cum_above60,
+                               percent_atleast_onedose_above60 = FirstDose / above60_population,
+                               #People vaccinated with JJ count towards fully vaccinated
+                               percent_fully_vaccinated_above60 = (SecondDose + FirstDoseJJ_above60) / above60_population,
+                               percent_boosted_above60 = DoseAdditional1 / above60_population)
+
+#Sweden and France are missing the Percent_fully_vaccinated variable because they lack the FirstDoseJJ variable
+#as neither of these countries used JJ vaccines in the target group above 60
+#Calculating this value for sweden 
+eu_vaccines_cum_above60[eu_vaccines_cum_above60$ReportingCountry == 'SE', "percent_fully_vaccinated_above60"] <-
+  eu_vaccines_cum_above60[eu_vaccines_cum_above60$ReportingCountry == 'SE', "SecondDose"] / 
+  eu_vaccines_cum_above60[eu_vaccines_cum_above60$ReportingCountry == 'SE', "above60_population"]
+
+eu_vaccines_cum_above60[eu_vaccines_cum_above60$ReportingCountry == 'FR', "percent_fully_vaccinated_above60"] <-
+  eu_vaccines_cum_above60[eu_vaccines_cum_above60$ReportingCountry == 'FR', "SecondDose"] / 
+  eu_vaccines_cum_above60[eu_vaccines_cum_above60$ReportingCountry == 'FR', "above60_population"]
+
+#I have checked the % of fully vaccinated above 60 and % boosters above 60 with the EU CDC  dashboard of COVID
+# vaccines & found the values calculated in eu_vaccines_cum_above60 to be matching satisfactorily, except for 
+#IE, IS, and PT. For these, the calculated value exceeds 100%; All these countries do have 100% uptake 
+#for these variables. This can be explained as census data for those above 60 are few years old
+
+#Changing the values to 100% for those that exceed 100%. 
+
+eu_vaccines_cum_above60 <- eu_vaccines_cum_above60 %>% 
+  mutate(percent_atleast_onedose_above60 = replace(percent_atleast_onedose_above60,
+                                                   percent_atleast_onedose_above60 > 1,
+                                                1),
+         percent_fully_vaccinated_above60 = replace(percent_fully_vaccinated_above60,
+                                                    percent_fully_vaccinated_above60 > 1,
+                                                 1))
+
+#Dropping unnecessary columns from the eu_vaccines_cum_ltcf dataset and renaming columns to allow for merging
+#with eu_vaccines_cum_all without conflicts
+eu_vaccines_cum_above60 <- select(eu_vaccines_cum_above60,-c("FirstDose","SecondDose","DoseAdditional1","na.rm",
+                                                       "FirstDoseJJ_above60"))
+
+eu_vaccines_cum_above60 <- rename(eu_vaccines_cum_above60, unknown_dose_ltcf = UnknownDose)
+
+#Germany (DE) had not coded target groups like "Age60_69","Age70_79","Age80+" but instead has '1_Age>60'
+germany_above60_stats <- eu_vaccines %>% 
+                         filter(ReportingCountry == 'DE' & TargetGroup == '1_Age60+') %>%
+                         summarise(FirstDose = sum(FirstDose),
+                                   SecondDose = sum(SecondDose),
+                                   DoseAdditional1 = sum(DoseAdditional1),
+                                   UnknownDose = sum(UnknownDose),
+                                   above60_population = max(Denominator)) %>% 
+                         mutate(percent_atleast_onedose_above60 = FirstDose / above60_population,
+                                #Germany has not given JJ to above 60 year olds
+                                percent_fully_vaccinated_above60 = SecondDose / above60_population,
+                                percent_boosted_above60 = DoseAdditional1 / above60_population,
+                                ReportingCountry = 'DE') %>%
+                         select(-c(FirstDose,SecondDose,DoseAdditional1))
+
+#Adding germany_above60_stats to eu_vaccines_cum_above60
+eu_vaccines_cum_above60 <- bind_rows(eu_vaccines_cum_above60,germany_above60_stats)

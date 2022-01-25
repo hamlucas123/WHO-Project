@@ -102,3 +102,67 @@ eu_vaccines_cum_all[eu_vaccines_cum_all$ReportingCountry == 'MT', "NumberDosesAv
 
 #I have checked the % of fully vaccinated people with the EU CDC interactive dashboard of COVID vaccinations
 #and found the values calculated in eu_vaccines_cum_all to be matching satisfactorily 
+
+##For vaccination statistics in HCWs:
+
+#Dataframe holding populations of the HCWs among the EU countries that mention it
+eu_hcw_populations <- eu_vaccines %>% filter(TargetGroup == 'HCW') %>%
+                      group_by(ReportingCountry) %>%
+                      #Each of the countries have only one unique value of the denominator for the HCW group 
+                      summarise(hcw_population = max(Denominator)) 
+
+#We want data for HCW population with cumulative doses received, exported, 
+#first dose, second dose, doseadditional1, and unknowndoses given as of 2021-W52
+eu_vaccines_cum_hcw <- eu_vaccines %>% filter(TargetGroup == 'HCW') %>%
+                      group_by(ReportingCountry) %>%
+                      summarise_at(.vars = vars(FirstDose,SecondDose,DoseAdditional1,UnknownDose),
+                                .funs = sum, na.rm = T)
+
+eu_vaccines_cum_hcw <- inner_join(eu_vaccines_cum_hcw, eu_hcw_populations, by = "ReportingCountry")
+
+#Dataframe holding cumulative first doses of JJ vaccine given to HCWs as of 2021-W52
+JJ_doses_cum_hcw <- eu_vaccines %>% 
+  filter(Vaccine == 'JANSS') %>%
+  filter(TargetGroup == 'HCW') %>% 
+  group_by(ReportingCountry) %>%
+  summarise(FirstDoseJJ_hcw = sum(FirstDose),na.rm = T)
+
+#Adding a column on first doses of JJ vaccine given to HCW to the eu_vaccines_cum_hcw df
+eu_vaccines_cum_hcw <- left_join(eu_vaccines_cum_hcw, JJ_doses_cum_hcw, by = "ReportingCountry")
+
+#Calculating %s for eu_vaccines_cum_hcw 
+eu_vaccines_cum_hcw <- mutate(eu_vaccines_cum_hcw,
+                              percent_atleast_onedose_hcw = FirstDose / hcw_population,
+                              #People vaccinated with JJ count towards fully vaccinated
+                              percent_fully_vaccinated_hcw = (SecondDose + FirstDoseJJ_hcw) / hcw_population,
+                              percent_boosted_hcw = DoseAdditional1 / hcw_population)
+
+#Sweden is missing the Percent_fully_vaccinated variable because it is missing the FirstDoseJJ variable
+#as sweden didn't use JJ vaccines and has not mentioned JJ in the target group 
+#Calculating this value for sweden 
+eu_vaccines_cum_hcw[eu_vaccines_cum_hcw$ReportingCountry == 'SE', "percent_fully_vaccinated_hcw"] <-
+  eu_vaccines_cum_hcw[eu_vaccines_cum_hcw$ReportingCountry == 'SE', "SecondDose"] / 
+  eu_vaccines_cum_hcw[eu_vaccines_cum_hcw$ReportingCountry == 'SE', "hcw_population"]
+
+#I have checked the % of fully vaccinated HCWs with the EU CDC interactive dashboard of COVID vaccinations
+#and found the values calculated in eu_vaccines_cum_hcw to be matching satisfactorily, except for 4 countries
+#CZ,HU,IE,IS -- for these the calculated value exceeds 100%; All these countries do have 100% HCW vaccination
+#It is likely that the measure of hcw_population is old, or that there were additional people deemed HCW who 
+#are otherwise not in healthcare, e.g. volunteers, HCW who came back from retirement for COVID.
+#Changing the values to 100% for those that exceed 100%. 
+
+eu_vaccines_cum_hcw <- eu_vaccines_cum_hcw %>% 
+                       mutate(percent_atleast_onedose_hcw = replace(percent_atleast_onedose_hcw,
+                                                                    percent_atleast_onedose_hcw > 1,
+                                                                    1),
+                              percent_fully_vaccinated_hcw = replace(percent_fully_vaccinated_hcw,
+                                                                     percent_fully_vaccinated_hcw > 1,
+                                                                    1))
+
+#Dropping unnecessary columns from the eu_vaccines_cum_hcw dataset and renaming columns to allow for merging
+#with eu_vaccines_cum_all without conflicts
+eu_vaccines_cum_hcw <- select(eu_vaccines_cum_hcw,-c("FirstDose","SecondDose","DoseAdditional1","na.rm",
+                                                     "FirstDoseJJ_hcw"))
+
+eu_vaccines_cum_hcw <- rename(eu_vaccines_cum_hcw, unknown_dose_hcw = UnknownDose)
+                         

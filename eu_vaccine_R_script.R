@@ -27,8 +27,7 @@ eu_vaccines_cum_all_1 <- eu_vaccines %>%
                        filter(ReportingCountry %in% countries_reporting_age_below_18) %>%
                        filter(TargetGroup %in% c('ALL','Age<18','AgeUNK')) %>% 
                        group_by(ReportingCountry) %>%
-                       summarise_at(.vars = vars(NumberDosesReceived,NumberDosesExported,
-                                                 FirstDose,SecondDose,DoseAdditional1,UnknownDose),
+                       summarise_at(.vars = vars(FirstDose,SecondDose,DoseAdditional1,UnknownDose),
                                     .funs = sum, na.rm = T)
                        
 #For the countries that don't report 'Age<18'                       
@@ -36,8 +35,7 @@ eu_vaccines_cum_all_2 <- eu_vaccines %>%
                          filter(!(ReportingCountry %in% countries_reporting_age_below_18)) %>%
                          filter(TargetGroup %in% c('ALL','Age0_4','Age5_9','Age10_14','Age15_17','AgeUNK')) %>%
                          group_by(ReportingCountry) %>%
-                         summarise_at(.vars = vars(NumberDosesReceived,NumberDosesExported,
-                                                  FirstDose,SecondDose,DoseAdditional1,UnknownDose),
+                         summarise_at(.vars = vars(FirstDose,SecondDose,DoseAdditional1,UnknownDose),
                                       .funs = sum, na.rm = T)
 
 #Combining the eu_vaccines_cum_all_1 and eu_vaccines_cum_all_2
@@ -81,7 +79,6 @@ eu_vaccines_cum_all <- inner_join(eu_vaccines_cum_all, eu_populations, by = "Rep
 
 #Calculating %s and other columns for eu_vaccines_cum_all 
 eu_vaccines_cum_all <- mutate(eu_vaccines_cum_all,
-                              NumberDosesAvailable = NumberDosesReceived - NumberDosesExported,
                               Percent_atleast_onedose = FirstDose / Population,
                               #People vaccinated with JJ count towards fully vaccinated
                               Percent_fully_vaccinated = (SecondDose + FirstDoseJJ) / Population,
@@ -93,12 +90,6 @@ eu_vaccines_cum_all <- mutate(eu_vaccines_cum_all,
 eu_vaccines_cum_all[eu_vaccines_cum_all$ReportingCountry == 'SE', "Percent_fully_vaccinated"] <-
 eu_vaccines_cum_all[eu_vaccines_cum_all$ReportingCountry == 'SE', "SecondDose"] / 
 eu_vaccines_cum_all[eu_vaccines_cum_all$ReportingCountry == 'SE', "Population"]
-
-#Number of doses available for Malta ('MT') is negative as they had values only number of doses exported but 
-#not for the number of doses received (the calculated Number of doses was -341380)
-#Replacing this value with NA
-
-eu_vaccines_cum_all[eu_vaccines_cum_all$ReportingCountry == 'MT', "NumberDosesAvailable"] <- NA
 
 #I have checked the % of fully vaccinated people with the EU CDC interactive dashboard of COVID vaccinations
 #and found the values calculated in eu_vaccines_cum_all to be matching satisfactorily 
@@ -320,3 +311,23 @@ germany_above60_stats <- eu_vaccines %>%
 
 #Adding germany_above60_stats to eu_vaccines_cum_above60
 eu_vaccines_cum_above60 <- bind_rows(eu_vaccines_cum_above60,germany_above60_stats)
+
+#Adding data regarding vaccines cumulative vaccines received and exported as of W52 2021
+vaccines_received_exported <- eu_vaccines %>% 
+                              filter(TargetGroup == 'ALL') %>%
+                              group_by(ReportingCountry) %>% 
+                              summarise_at(.vars = vars(NumberDosesReceived,NumberDosesExported),
+                                           .funs = sum, na.rm =T)
+
+#Merging all dataframes together to a single one
+eu_vaccines_clean <- inner_join(eu_vaccines_cum_all,vaccines_received_exported,by = 'ReportingCountry')
+
+eu_vaccines_clean <- eu_vaccines_clean %>% mutate(available_doses = NumberDosesReceived - NumberDosesExported,
+                                                  percent_doses_utilised = (FirstDose + SecondDose + DoseAdditional1 +
+                                                                 UnknownDose)/available_doses)
+
+#Number of doses available for Malta ('MT') is negative as they had values only number of doses exported but 
+#not for the number of doses received (the calculated Number of doses was -341380)
+#Replacing this value with NA
+
+eu_vaccines_clean[eu_vaccines_clean$ReportingCountry == 'MT', c("available_doses","percent_doses_utilised")] <- NA

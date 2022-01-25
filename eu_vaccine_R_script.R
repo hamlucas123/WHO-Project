@@ -165,4 +165,71 @@ eu_vaccines_cum_hcw <- select(eu_vaccines_cum_hcw,-c("FirstDose","SecondDose","D
                                                      "FirstDoseJJ_hcw"))
 
 eu_vaccines_cum_hcw <- rename(eu_vaccines_cum_hcw, unknown_dose_hcw = UnknownDose)
+
+##For vaccination statistics in LTCF:
+
+#Dataframe holding populations of the LTCF residents among the EU countries that mention it
+eu_ltcf_populations <- eu_vaccines %>% filter(TargetGroup == 'LTCF') %>%
+  group_by(ReportingCountry) %>%
+  #Each of the countries have only one unique value of the denominator for the HCW group 
+  summarise(ltcf_population = max(Denominator)) 
+
+#We want data for LTCF residents with cumulative doses received, exported, 
+#first dose, second dose, doseadditional1, and unknowndoses given as of 2021-W52
+
+eu_vaccines_cum_ltcf <- eu_vaccines %>% filter(TargetGroup == 'LTCF') %>%
+  group_by(ReportingCountry) %>%
+  summarise_at(.vars = vars(FirstDose,SecondDose,DoseAdditional1,UnknownDose),
+               .funs = sum, na.rm = T)
+
+eu_vaccines_cum_ltcf <- inner_join(eu_vaccines_cum_ltcf, eu_ltcf_populations, by = "ReportingCountry")
+
+#Dataframe holding cumulative first doses of JJ vaccine given to LTCF residents as of 2021-W52
+JJ_doses_cum_ltcf <- eu_vaccines %>% 
+  filter(Vaccine == 'JANSS') %>%
+  filter(TargetGroup == 'LTCF') %>% 
+  group_by(ReportingCountry) %>%
+  summarise(FirstDoseJJ_ltcf = sum(FirstDose),na.rm = T)
+
+#Adding a column on first doses of JJ vaccine given to LTCF residents to the eu_vaccines_cum_ltcf df
+eu_vaccines_cum_ltcf <- left_join(eu_vaccines_cum_ltcf, JJ_doses_cum_ltcf, by = "ReportingCountry")
+
+#Calculating %s for eu_vaccines_cum_ltcf
+eu_vaccines_cum_ltcf <- mutate(eu_vaccines_cum_ltcf,
+                              percent_atleast_onedose_ltcf = FirstDose / ltcf_population,
+                              #People vaccinated with JJ count towards fully vaccinated
+                              percent_fully_vaccinated_ltcf = (SecondDose + FirstDoseJJ_ltcf) / ltcf_population,
+                              percent_boosted_ltcf = DoseAdditional1 / ltcf_population)
+
+#Sweden is missing the Percent_fully_vaccinated variable because it is missing the FirstDoseJJ variable
+#as sweden didn't use JJ vaccines and has not mentioned JJ in the target group 
+#Calculating this value for sweden 
+eu_vaccines_cum_ltcf[eu_vaccines_cum_ltcf$ReportingCountry == 'SE', "percent_fully_vaccinated_ltcf"] <-
+  eu_vaccines_cum_ltcf[eu_vaccines_cum_ltcf$ReportingCountry == 'SE', "SecondDose"] / 
+  eu_vaccines_cum_ltcf[eu_vaccines_cum_ltcf$ReportingCountry == 'SE', "ltcf_population"]
+
+#I have checked the % of fully vaccinated LTCFs and % boosters with the EU CDC interactive dashboard of COVID 
+# vaccines & found the values calculated in eu_vaccines_cum_ltcf to be matching satisfactorily, except for 
+#Spain (double vac %) and Malta (Booster %). For these, the calculated value exceeds 100%; All these countries 
+#do have 100% uptake for these variables 
+
+#Changing the values to 100% for those that exceed 100%. 
+
+eu_vaccines_cum_ltcf <- eu_vaccines_cum_ltcf %>% 
+                        mutate(percent_atleast_onedose_ltcf = replace(percent_atleast_onedose_ltcf,
+                                                                     percent_atleast_onedose_ltcf > 1,
+                                                                     1),
+                               percent_fully_vaccinated_ltcf = replace(percent_fully_vaccinated_ltcf,
+                                                                      percent_fully_vaccinated_ltcf > 1,
+                                                                      1),
+                               percent_boosted_ltcf = replace(percent_boosted_ltcf,
+                                                              percent_boosted_ltcf > 1,
+                                                                      1))
+
+#Dropping unnecessary columns from the eu_vaccines_cum_ltcf dataset and renaming columns to allow for merging
+#with eu_vaccines_cum_all without conflicts
+eu_vaccines_cum_ltcf <- select(eu_vaccines_cum_ltcf,-c("FirstDose","SecondDose","DoseAdditional1","na.rm",
+                                                     "FirstDoseJJ_ltcf"))
+
+eu_vaccines_cum_ltcf <- rename(eu_vaccines_cum_ltcf, unknown_dose_ltcf = UnknownDose)
                          

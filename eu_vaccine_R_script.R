@@ -25,7 +25,7 @@ countries_reporting_age_below_18 <- c('AT', 'BE', 'BG', 'CZ', 'EE', 'EL', 'ES', 
 #For the countries that report 'Age<18'
 eu_vaccines_cum_all_1 <- eu_vaccines %>%                
                        filter(ReportingCountry %in% countries_reporting_age_below_18) %>%
-                       filter(TargetGroup %in% c('ALL','Age<18')) %>% 
+                       filter(TargetGroup %in% c('ALL','Age<18','AgeUNK')) %>% 
                        group_by(ReportingCountry) %>%
                        summarise_at(.vars = vars(NumberDosesReceived,NumberDosesExported,
                                                  FirstDose,SecondDose,DoseAdditional1,UnknownDose),
@@ -34,7 +34,7 @@ eu_vaccines_cum_all_1 <- eu_vaccines %>%
 #For the countries that don't report 'Age<18'                       
 eu_vaccines_cum_all_2 <- eu_vaccines %>%
                          filter(!(ReportingCountry %in% countries_reporting_age_below_18)) %>%
-                         filter(TargetGroup %in% c('ALL','Age0_4','Age5_9','Age10_14','Age15_17')) %>%
+                         filter(TargetGroup %in% c('ALL','Age0_4','Age5_9','Age10_14','Age15_17','AgeUNK')) %>%
                          group_by(ReportingCountry) %>%
                          summarise_at(.vars = vars(NumberDosesReceived,NumberDosesExported,
                                                   FirstDose,SecondDose,DoseAdditional1,UnknownDose),

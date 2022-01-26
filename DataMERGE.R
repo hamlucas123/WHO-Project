@@ -81,19 +81,35 @@ colnames(df)[2] <- "Country"
 
 df$NumSrc <- NULL
 
+
+# owid_vaccines with euro_count_dict.csv to get 3 letter country code
+# df Country Code / owid_vaccines Code
+
+owid_vaccines[31, 1] <- "Moldova (Republic of Moldova)"
+owid_vaccines[40, 1] <- "Russian Federation"
+owid_vaccines[51, 1] <- "United Kingdom of Great Britain and Northern Ireland"
+
+
+dfowid <- merge(owid_vaccines, euro_count_dict, by.x = "location", 
+              by.y = "Country", all.x = TRUE, all.y = FALSE)
+
+
+dfowid <- dfowid[, -c(21:23)]
+dfowid <- dfowid[, -c(19)]
+dfowid <- dfowid[, -c(2)]
+
+df <- merge(df, dfowid, by.x = "Country Code", 
+            by.y = "ISO3", all.x = TRUE, all.y = FALSE)
+
+df$location <- NULL
+
 # eu_vaccines (two_letter_country_code) with euro_count_dict.csv (ISO2) to get 3 letter country code
 # df Country Code / eu_vaccines Code
 
 euro_count_dict <- read.csv('data/euro_count_dict.csv')
 
 dfeu <- merge(eu_vaccines, euro_count_dict, by.x = "two_letter_country_code", 
-                    by.y = "ISO2", all.x = TRUE, all.y = FALSE)
-
-
-
-# owid_vaccines with euro_count_dict.csv to get 3 letter country code
-# df Country Code / owid_vaccines Code
-
+              by.y = "ISO2", all.x = TRUE, all.y = FALSE)
 
 # total <- merge(data frameA,data frameB,by="ID")
 

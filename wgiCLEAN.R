@@ -45,3 +45,8 @@ gov_eff <- gov_eff[,c(1:2,129:134)] #select only 2020 scores
 colnames(gov_eff) <-  c('Country','Code', 'Estimate','StdErr','NumSrc','Rank','Lower','Upper') #rename columns
 
 gov_eff$Country[match(setdiff(euro_count_gov_efff, euro_count), gov_eff$Country)] <- setdiff(euro_count, euro_count_gov_efff) #replace country names
+
+wgi <- gov_eff
+rm(gov_eff)
+rm(euro_count)
+rm(euro_count_gov_efff)

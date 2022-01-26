@@ -199,3 +199,8 @@ df$Code <- NULL
 df$Year <- NULL
 df$Literacy.rates..World.Bank..CIA.World.Factbook..and.other.sources. <- NULL
 
+rm(gender)
+rm(literacy)
+worldbank <- df
+rm(df)
+rm(categories)

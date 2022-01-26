@@ -10,7 +10,7 @@ euro <- read_csv("data/euro_count_dict.csv")
 owid <- owid %>%
   filter(iso_code %in% euro$ISO3)
 
-# Filter by last date in 2021 (see Akshay's work)
+# Filter by last date in 2021
 owid <- owid[c("location",
                "date",
                "total_vaccinations",

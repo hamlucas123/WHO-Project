@@ -7,6 +7,9 @@ source('vax_child_CLEAN.R')
 source('eth_fracCLEAN.R')
 source('covid_stringencyCLEAN.R')
 source('corruption_CLEAN.R')
+source('eu_vaccine_R_script.R')
+source('owidcovidCLEAN.R')
+
 
 
 # total <- merge(data frameA,data frameB,by="ID")

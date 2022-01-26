@@ -35,21 +35,61 @@ df <- merge(df, corrupt, by.x = "Country Code",
 df <- df[, -c(23:25)]
 df <- df[, -c(21)]
 colnames(df)[21] <- "CPI score 2020 (Corruption Index)"
+colnames(df)[2] <- "Country"
 
-# df Country / eth_frac country (check missing)
+# df Country / eth_frac country (three missing in merge but re-added)
+
+eth_frac[26, 1] <- "Kyrgyz Republic"
+eth_frac[38, 1] <- "Russian Federation"
+eth_frac[41, 1] <- "Slovak Republic"
 
 
+df <- merge(df, eth_frac, by.x = "Country", 
+            by.y = "country", all.x = TRUE, all.y = FALSE)
 
+df <- df[, -c(25)]
 
 # df Country Code / stringency Code
 
+df <- merge(df, stringency, by.x = "Country Code", 
+            by.y = "Code", all.x = TRUE, all.y = FALSE)
 
 # df Country Code / vax_flu LOCATION
 
+df <- merge(df, vax_flu, by.x = "Country Code", 
+            by.y = "LOCATION", all.x = TRUE, all.y = FALSE)
+
+df <- df[, -c(27)]
+df <- df[, -c(25)]
+
+colnames(df)[26] <- "Flu Vax Value"
+
+
 # df Country Code / wgi Code (check Andorra)
 
-# eu_vaccines with euro_count_dict.csv to get 3 letter country code
+wgi[1, 2] <- "AND"
+
+df <- merge(df, wgi, by.x = "Country Code", 
+            by.y = "Code", all.x = TRUE, all.y = FALSE)
+
+df <- df[, -c(32:33)]
+
+df <- df[, -c(27:29)]
+
+colnames(df)[28] <- "Government Effectiveness Index Rank"
+colnames(df)[2] <- "Country"
+
+df$NumSrc <- NULL
+
+# eu_vaccines (two_letter_country_code) with euro_count_dict.csv (ISO2) to get 3 letter country code
 # df Country Code / eu_vaccines Code
+
+euro_count_dict <- read.csv('data/euro_count_dict.csv')
+
+dfeu <- merge(eu_vaccines, euro_count_dict, by.x = "two_letter_country_code", 
+                    by.y = "ISO2", all.x = TRUE, all.y = FALSE)
+
+
 
 # owid_vaccines with euro_count_dict.csv to get 3 letter country code
 # df Country Code / owid_vaccines Code

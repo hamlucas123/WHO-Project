@@ -1,4 +1,4 @@
-eu_vaccines_raw <- read.csv("/Users/teejay/Documents/GitHub/WHO-Project/data/eu_vaccine.csv")
+eu_vaccines_raw <- read.csv("data/eu_vaccine.csv")
 
 #Load required packages
 library('dplyr') 

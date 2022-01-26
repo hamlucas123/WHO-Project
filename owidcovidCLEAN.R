@@ -11,7 +11,6 @@ owid <- owid %>%
   filter(iso_code %in% euro$ISO3)
 
 # Filter by last date in 2021 (see Akshay's work)
-str(owid)
 owid <- owid[c("location",
                "date",
                "total_vaccinations",
@@ -30,20 +29,19 @@ owid <- owid[c("location",
                "population",
                "population_density",
                "aged_65_older")]
-
+# Make a copy
 owid2 <- owid
-#  filter(date == "2021-12-31")
-#owid2 <- owid2 %>% 
-#  group_by(location) %>%
-#  filter(date == max(date))
 
-owid2 <- owid2 %>% mutate(date = as.Date(date, format = "%Y-%m-%d"))
+# See latest entries
+owid2 <- owid2 %>% 
+  group_by(location) %>%
+  filter(date == max(date))
 
-myfunc <- function(x,y){owid2[owid2$date >= x & owid2$date <= y,]}
+# Set date for last day of year 2021
+owid3 <- owid %>% filter(date == "2021-12-31")
 
-DATE1 <- as.Date("2021-10-01")
-DATE2 <- as.Date("2021-12-31")
+# Add on missing Turkmenistan data 
+# Turkmenistan's latest data is 2021-08-29
+owid2 <- owid2 %>% filter(location == "Turkmenistan")
+dfowid <- rbind(owid3, owid2)
 
-Test <- myfunc(DATE1,DATE2)    
-
-Test %>% filter(location == 'Turkmenistan')

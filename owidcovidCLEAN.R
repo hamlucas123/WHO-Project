@@ -45,4 +45,5 @@ owid3 <- owid %>% filter(date == "2021-12-31")
 owid2 <- owid2 %>% filter(location == "Turkmenistan")
 dfowid <- rbind(owid3, owid2)
 owid_vaccines <- dfowid
-rm(list=setdiff(ls(), "owid_vaccines"))
+rm(dfowid, euro, owid, owid2, owid3)
+# rm(list=setdiff(ls(), "owid_vaccines"))

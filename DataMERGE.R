@@ -1,3 +1,5 @@
+source('eu_vaccine_R_script.R')
+source('owidcovidCLEAN.R')
 source('worldbankCLEAN.R')
 source('wgiCLEAN.R')
 source('vax_fluCLEAN.R')
@@ -5,8 +7,6 @@ source('vax_childmmrCLEAN.R')
 source('eth_fracCLEAN.R')
 source('covid_stringencyCLEAN.R')
 source('corruption_CLEAN.R')
-source('eu_vaccine_R_script.R')
-source('owidcovidCLEAN.R')
 
 
 

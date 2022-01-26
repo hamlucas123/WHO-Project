@@ -48,7 +48,7 @@ eu_vaccines_cum_all <- bind_rows(eu_vaccines_cum_all_1,eu_vaccines_cum_all_2)
 JJ_doses_cum_all_1 <- eu_vaccines %>% 
                     filter(Vaccine == 'JANSS') %>%
                     filter(ReportingCountry %in% countries_reporting_age_below_18) %>%
-                    filter(TargetGroup %in% c('ALL','Age<18')) %>% 
+                    filter(TargetGroup %in% c('ALL','Age<18','AgeUNK')) %>% 
                     group_by(ReportingCountry) %>%
                     summarise(FirstDoseJJ = sum(FirstDose),na.rm = T)
 
@@ -56,7 +56,7 @@ JJ_doses_cum_all_1 <- eu_vaccines %>%
 JJ_doses_cum_all_2 <- eu_vaccines %>% 
                       filter(Vaccine == 'JANSS') %>%
                       filter(!(ReportingCountry %in% countries_reporting_age_below_18)) %>%
-                      filter(TargetGroup %in% c('ALL','Age0_4','Age5_9','Age10_14','Age15_17')) %>%
+                      filter(TargetGroup %in% c('ALL','Age0_4','Age5_9','Age10_14','Age15_17','AgeUNK')) %>%
                       group_by(ReportingCountry) %>%
                       summarise(FirstDoseJJ = sum(FirstDose),na.rm = T)
 

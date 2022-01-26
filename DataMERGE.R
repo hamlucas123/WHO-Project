@@ -112,5 +112,17 @@ df$location <- NULL
 dfeu <- merge(eu_vaccines, euro_count_dict, by.x = "two_letter_country_code", 
               by.y = "ISO2", all.x = TRUE, all.y = FALSE)
 
-# total <- merge(data frameA,data frameB,by="ID")
+dfeu[18, 32] <- "LIE"
+dfeu[9, 32] <- "GRC"
+
+df <- merge(df, dfeu, by.x = "Country Code", 
+            by.y = "ISO3", all.x = TRUE, all.y = TRUE)
+
+df <- df[, -c(72:76)]
+df <- df[, -c(44)]
+
+rm(list=setdiff(ls(), "df"))
+
+
+
 

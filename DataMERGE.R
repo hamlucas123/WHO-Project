@@ -13,6 +13,8 @@ library(tidyr)
 library(stringr)
 library(data.table)
 
+euro_count_dict <- read.csv('data/euro_count_dict.csv')
+
 # worldbank Country Code  / vax_child LOCATION (do first)
 
 df <- merge(worldbank, vax_child, by.x = "Country Code", 
@@ -106,7 +108,6 @@ df$location <- NULL
 # eu_vaccines (two_letter_country_code) with euro_count_dict.csv (ISO2) to get 3 letter country code
 # df Country Code / eu_vaccines Code
 
-euro_count_dict <- read.csv('data/euro_count_dict.csv')
 
 dfeu <- merge(eu_vaccines, euro_count_dict, by.x = "two_letter_country_code", 
               by.y = "ISO2", all.x = TRUE, all.y = FALSE)

@@ -292,7 +292,7 @@ eu_vaccines_cum_above60 <- eu_vaccines_cum_above60 %>%
 eu_vaccines_cum_above60 <- select(eu_vaccines_cum_above60,-c("FirstDose","SecondDose","DoseAdditional1","na.rm",
                                                        "FirstDoseJJ_above60"))
 
-eu_vaccines_cum_above60 <- rename(eu_vaccines_cum_above60, unknown_dose_ltcf = UnknownDose)
+eu_vaccines_cum_above60 <- rename(eu_vaccines_cum_above60, unknown_dose_above60 = UnknownDose)
 
 #Germany (DE) had not coded target groups like "Age60_69","Age70_79","Age80+" but instead has '1_Age>60'
 germany_above60_stats <- eu_vaccines %>% 
@@ -300,7 +300,6 @@ germany_above60_stats <- eu_vaccines %>%
                          summarise(FirstDose = sum(FirstDose),
                                    SecondDose = sum(SecondDose),
                                    DoseAdditional1 = sum(DoseAdditional1),
-                                   UnknownDose = sum(UnknownDose),
                                    above60_population = max(Denominator)) %>% 
                          mutate(percent_atleast_onedose_above60 = FirstDose / above60_population,
                                 #Germany has not given JJ to above 60 year olds
@@ -331,3 +330,35 @@ eu_vaccines_clean <- eu_vaccines_clean %>% mutate(available_doses = NumberDosesR
 #Replacing this value with NA
 
 eu_vaccines_clean[eu_vaccines_clean$ReportingCountry == 'MT', c("available_doses","percent_doses_utilised")] <- NA
+
+#Combining statistics for above 60, hcw, ltcf into eu_vaccines_clean
+eu_vaccines_clean <- left_join(eu_vaccines_clean,eu_vaccines_cum_hcw, by = 'ReportingCountry')
+eu_vaccines_clean <- left_join(eu_vaccines_clean,eu_vaccines_cum_ltcf, by = 'ReportingCountry')
+eu_vaccines_clean <- left_join(eu_vaccines_clean,eu_vaccines_cum_above60, by = 'ReportingCountry')
+
+#Removing unnecessary columns and renaming others
+eu_vaccines_clean <- select(eu_vaccines_clean,-c("FirstDoseJJ","na.rm"))
+eu_vaccines_clean <- rename(eu_vaccines_clean,
+                            cum_first_doses = FirstDose,
+                            cum_second_doses = SecondDose,
+                            cum_additional1_doses = DoseAdditional1,
+                            cum_unknown_doses = UnknownDose,
+                            total_population = Population,
+                            percent_atleast_onedose_total_pop = Percent_atleast_onedose,
+                            percent_fully_vaccinated_total_pop = Percent_fully_vaccinated,
+                            percent_boosted_total_pop = Percent_boosted,
+                            total_doses_received = NumberDosesReceived,
+                            total_doses_exported = NumberDosesExported, 
+                            two_letter_country_code = ReportingCountry)
+
+#Adding a full name for the ReportingCountry Code
+
+country_names_codes <- data.frame(
+                       two_letter_country_code = sort(eu_vaccines_clean$two_letter_country_code),
+                       full_country_names =
+                        c("Austria", "Belgium", "Bulgaria","Cyprus","Czechia","Germany","Denmark","Estonia","Greece",
+                          "Spain","Finland","France","Croatia","Hungary","Ireland","Iceland","Italy",
+                          "Liechtenstein", "Lithuania", "Luxembourg", "Latvia","Malta","Netherlands","Norway",
+                          "Poland","Portugal","Romania","Sweden","Slovenia","Slovakia"))
+
+eu_vaccines_clean = inner_join(eu_vaccines_clean,country_names_codes)

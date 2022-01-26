@@ -4,7 +4,7 @@ euro_count <- read.csv("data/euro_count_dict.csv")
 # 51 countries included 
 # missing Montenegro, North Macedonia
 
-
+colnames(data)[1] <- 'country'
 eth_missing <- data %>%
   filter(country == "Russia")
 eth_frac <- data %>%
@@ -14,3 +14,6 @@ eth_frac <- data %>%
   arrange(country)
 
 euro_count[!(euro_count %in% eth_frac$country)]
+rm(data)
+rm(euro_count)
+rm(eth_missing)

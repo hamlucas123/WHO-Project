@@ -44,4 +44,5 @@ owid3 <- owid %>% filter(date == "2021-12-31")
 # Turkmenistan's latest data is 2021-08-29
 owid2 <- owid2 %>% filter(location == "Turkmenistan")
 dfowid <- rbind(owid3, owid2)
-
+owid_vaccines <- dfowid
+rm(list=setdiff(ls(), "owid_vaccines"))

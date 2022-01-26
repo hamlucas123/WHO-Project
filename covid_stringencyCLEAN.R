@@ -57,3 +57,6 @@ csi <- with(csi, csi[(Day >= '2021-12-24') & (Day <='2021-12-31'),])
 aggr <- aggregate(stringency_index~Entity+Code, data = csi, FUN = mean)
 aggr_missing <- aggregate(stringency_index~Entity+Code, data = missing, FUN = mean)
 csi <- rbind(aggr, aggr_missing)
+stringency <- csi
+
+rm(aggr, aggr_missing, csi, missing, csi_country, euro_count, missing_count)

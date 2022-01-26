@@ -362,3 +362,8 @@ country_names_codes <- data.frame(
                           "Poland","Portugal","Romania","Sweden","Slovenia","Slovakia"))
 
 eu_vaccines_clean = inner_join(eu_vaccines_clean,country_names_codes)
+
+eu_vaccines <- eu_vaccines_clean
+
+rm(list=setdiff(ls(), "eu_vaccines"))
+

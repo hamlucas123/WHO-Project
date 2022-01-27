@@ -32,6 +32,12 @@ owid <- owid[c("location",
 # Make a copy
 owid2 <- owid
 
+# owid_fix <- owid %>% fill(people_fully_vaccinated, .direction = "up")
+owid <- owid %>% group_by(location) %>% fill(c(total_vaccinations:new_vaccinations), .direction="up")
+
+owid <- owid %>% group_by(location) %>% fill(c(total_vaccinations_per_hundred:total_boosters_per_hundred), .direction="up")
+
+
 # See latest entries
 owid2 <- owid2 %>% 
   group_by(location) %>%

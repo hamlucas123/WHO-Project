@@ -10,22 +10,51 @@ library(dplyr)
 
 df <- df %>% mutate(vax_rate = coalesce(percent_fully_vaccinated_total_pop*100, people_fully_vaccinated_per_hundred))
 
-vax_pop_plot <- ggplot(data = df[complete.cases(df$vax_rate),],
-                   aes(x = reorder(Country.x, vax_rate),
-                       y = vax_rate)) + 
-  geom_point(aes(size = population)) + 
-  labs(x = 'Country', y = 'Vaccination rate by total population (%)')+
-  scale_x_discrete(guide = guide_axis(n.dodge=5)) +
-  ylim(0, 100)
-vax_pop_plot
+summarise(df,
+          Mean = mean(na.omit(vax_rate)),
+          SD = sd(na.omit(vax_rate)),
+          Low = quantile(na.omit(vax_rate), 0.025), High = quantile(na.omit(vax_rate), 0.975))
 
-vax_plot <- ggplot(data = df[complete.cases(df$vax_rate),],
-                       aes(x = reorder(Country.x, vax_rate),
-                           y = vax_rate)) + 
-  geom_bar(stat = 'identity') + 
-  labs(x = 'Country', y = 'Vaccination rate by total population (%)', title = 'COVID-19 Fully vaccinated rate of WHO Europe countries')+
+sum(na.omit(df$vax_rate) < 70)
+sum(na.omit(df$vax_rate) > 70)
+
+vax_pop_plot <- ggplot(data = df[complete.cases(df$vax_rate),],
+                       aes(x = reorder(`Country Code`, vax_rate),
+                           y = vax_rate,
+                           size = population/1000000)) + 
+  geom_point() + 
+  labs(x = 'Country', y = 'Percentage population fully vaccinated (%)', title = 'COVID-19 Fully vaccinated rate of WHO Europe countries',
+       size = 'Population per million')+
   scale_x_discrete(guide = guide_axis(n.dodge=5)) +
   ylim(0, 100)+
+  scale_size_continuous(breaks = c(25,50,75,100,125),
+                        range = c(1,5)) +
   geom_hline(yintercept=70, linetype="dashed", color = "red")
-  
+
+vax_pop_plot
+
+ggsave(
+  filename ='vax_scatter.png',
+  device = 'png',
+  path = 'plots',
+  dpi = 'print'
+)
+
+
+vax_plot <- ggplot(data = df[complete.cases(df$vax_rate),],
+                   aes(x = reorder(`Country Code`,vax_rate),
+                       y = vax_rate)) + 
+  geom_bar(stat = 'identity') + 
+  labs(x = 'Country', y = 'Vaccination rate by total population (%)', title = 'COVID-19 Fully vaccinated rate of WHO Europe countries')+
+  scale_x_discrete(guide = guide_axis(n.dodge=3)) +
+  ylim(0, 100)+
+  geom_hline(yintercept=70, linetype="dashed", color = "red")
+
 vax_plot
+
+ggsave(
+  filename ='vax_bar.png',
+  device = 'png',
+  path = 'plots',
+  dpi = 'print'
+)

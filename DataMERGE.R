@@ -87,9 +87,9 @@ df$NumSrc <- NULL
 # owid_vaccines with euro_count_dict.csv to get 3 letter country code
 # df Country Code / owid_vaccines Code
 
-owid_vaccines[31, 1] <- "Moldova (Republic of Moldova)"
-owid_vaccines[40, 1] <- "Russian Federation"
-owid_vaccines[51, 1] <- "United Kingdom of Great Britain and Northern Ireland"
+owid_vaccines[30, 1] <- "Moldova (Republic of Moldova)"
+owid_vaccines[38, 1] <- "Russian Federation"
+owid_vaccines[49, 1] <- "United Kingdom of Great Britain and Northern Ireland"
 
 
 dfowid <- merge(owid_vaccines, euro_count_dict, by.x = "location", 

@@ -1,6 +1,7 @@
 library(readr)
 library(readxl)
 library(dplyr)
+library(tidyr)
 library(lubridate, warn.conflicts = FALSE)
 
 owid <- read_excel("data/owid-covid-data.xlsx")

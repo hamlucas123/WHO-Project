@@ -121,6 +121,10 @@ df <- merge(df, dfeu, by.x = "Country Code",
 df <- df[, -c(72:76)]
 df <- df[, -c(44)]
 
+#Uzbekistan ppl fully vaccinated: 12441333
+df[54,30] <- 12441333
+#ppl fully vaccinated per hundred: 36.66
+df[54, 36] <- 36.66
 rm(list=setdiff(ls(), "df"))
 
 # write.csv(df,"data/merged_data.csv", row.names = FALSE)

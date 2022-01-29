@@ -36,6 +36,8 @@ owid2 <- owid
 Bosnia <- owid2 %>% filter(location == "Bosnia and Herzegovina") # 2021-11-04
 Monaco <- owid2 %>% filter(location == "Monaco") # 2021-09-16
 
+Uzbek2 <- owid2 %>% filter(location == "Uzbekistan") %>% fill(c(total_vaccinations:new_vaccinations), .direction="up")
+
 Bosnia <- Bosnia %>% filter(date == "2021-11-04")
 Monaco <- Monaco %>% filter(date == "2021-09-16")
 
@@ -63,5 +65,5 @@ dfowid <- rbind(dfowid, Bosnia) # add full Bosnia row
 dfowid <- rbind(dfowid, Monaco) # add full Monaco row
 
 owid_vaccines <- dfowid
-rm(dfowid, euro, owid, owid2, owid3, Bosnia, Monaco)
+rm(dfowid, euro, owid, owid2, owid3, Bosnia, Monaco, Uzbek2)
 # rm(list=setdiff(ls(), "owid_vaccines"))

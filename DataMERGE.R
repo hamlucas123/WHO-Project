@@ -123,6 +123,8 @@ df <- df[, -c(44)]
 
 rm(list=setdiff(ls(), "df"))
 
+# write.csv(df,"data/merged_data.csv", row.names = FALSE)
+
 
 
 

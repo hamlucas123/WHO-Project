@@ -5,7 +5,10 @@
 ##
 source('DataMERGE.R')
 
+#install.packages('geofacet')
+
 library(ggplot2)
+library(geofacet)
 library(dplyr)
 
 df <- df %>% mutate(vax_rate = coalesce(percent_fully_vaccinated_total_pop*100, people_fully_vaccinated_per_hundred))
@@ -68,3 +71,68 @@ ggsave(
   path = 'plots',
   dpi = 'print'
 )
+
+missing <- c("Andorra","Armenia","Azerbaijan",'Georgia','Israel',"Kazakhstan", "Kyrgyz Republic", "Liechtenstein","Monaco",'North Macedonia','San Marino','Tajikistan','Turkmenistan','Uzbekistan')
+
+count <- df$Country.x
+
+count[count == 'Czech Republic'] <- 'Czechia'
+count[count =='Moldova'] <- 'Moldova, Republic of'
+count[count == 'Slovak Republic'] <- 'Slovakia'
+count[count == 'North Macedonia'] <- 'Macedonia, the former Yugoslav Republic of'
+
+df <- df %>% mutate(country = count)
+
+df <- df %>% mutate(x = rep(1, length(df$country)))
+df <- df %>% mutate(y = rep(1, length(df$country)))
+
+euro_grid_70 <- ggplot(df[complete.cases(df$vax_rate)], aes(x, y)) +
+  facet_geo(~country, grid = 'europe_countries_grid1', label = 'name') +
+  geom_point(aes(colour = vax_rate, size = population/1000000 )) +
+  scale_colour_gradient2(low = "red",
+                         mid = 'blue',
+                       high = "blue",
+                       midpoint = 70)
+euro_grid_70
+
+euro_grid <- ggplot(df[complete.cases(df$vax_rate)], aes(x, y)) +
+  facet_geo(~country, grid = 'europe_countries_grid1', label = 'name') +
+  geom_point(aes(colour = vax_rate, size = population/1000000 )) +
+  scale_colour_gradient(low ='white',
+                        high = 'black')+
+  labs(x = '', y = '')
+
+euro_grid
+
+euro_grid_nopop <- ggplot(df[complete.cases(df$vax_rate)], aes(x, y)) +
+  facet_geo(~country, grid = 'europe_countries_grid1', label = 'name') +
+  geom_point(aes(colour = vax_rate), size = 5) +
+  scale_colour_gradient(low ='grey',
+                        high = 'black')+
+  labs(x = '', y = '')+
+  theme(axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks.y=element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank())
+
+euro_grid_nopop
+
+euro_grid_nopop_70 <- ggplot(df[complete.cases(df$vax_rate)], aes(x, y)) +
+  facet_geo(~country, grid = 'europe_countries_grid1', label = 'name') +
+  geom_point(aes(colour = vax_rate), size = 5) +
+  scale_colour_gradient2(low ='yellow',
+                         mid = 'black',
+                        high = 'black',
+                        midpoint = 70)+
+  labs(x = '', y = '')+
+  theme(axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks.y=element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank())
+euro_grid_nopop_70

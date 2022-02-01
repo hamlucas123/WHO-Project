@@ -1,13 +1,18 @@
 merged_data <- read.csv("data/merged_data.csv")
 
+#Load required packages 
+
 library(tidyverse)
 library(dplyr)
 library(Hmisc)
 library(corrplot)
 
+library(fabricatr)
+
 library(caret)
 library(glmnet)
 
+#Remove the two countries that are not in the WHO EU region
 who_eu_53_countries <- merged_data %>% filter(!(Country.x %in% c("Kosovo","Liechtenstein")))
 rm(merged_data)
 
@@ -17,7 +22,6 @@ summary(who_eu_53_countries)
 #There are no countries with missing vaccination data (total population vaccinated)
 #Countries for whom data was collected outside of the EU CDC website lack data for percent_fully_vaccinated_total_pop
 #Calculating them for the 24 countries missing them
-
 
 #For countries that lack the EU CDC percent_fully_vaccinated_total_pop statistic for the general population 
 vaccination_stats_missing_in_eu_cdc <- 
@@ -60,6 +64,15 @@ who_eu_53_countries <- who_eu_53_countries %>%
          DTP = DTP..Child.Vax.,
          Measles = MEASLES..Child.Vax.,
          Flu = Flu.Vax.Value)
+
+#Descriptive statistics
+#Group dataset into countries as per their fully_vaccinated_total_population percentages
+#as four quartiles
+
+who_eu_53_countries['outcome_quartiles'] <- split_quantile(who_eu_53_countries$percent_fully_vaccinated_total_pop,4)
+
+View(who_eu_53_countries[,-c(1,2)] %>% group_by(outcome_quartiles) %>% summarise_all(.funs = mean, na.rm = T))
+#View(who_eu_53_countries[,-c(1,2)] %>% group_by(outcome_quartiles) %>% summarise_all(.funs = sd, na.rm = T))
 
 # Checking for multicollinearity between the covariates 
 
@@ -108,7 +121,34 @@ corrplot(corr_matrix, type = "upper", order = "hclust",   tl.cex = 0.7,
 #summary(target_group_statistics)
 ################
 
+covariate_list_trimmed = c("GDP_per_cap",
+                        "PHC_1.9",
+                        "GINI",
+                        "Literacy",
+                        "Edu_primary",
+                        "Edu_secondary",
+                        "Edu_bachelor",
+                        "Health_spending_per_cap",
+                        "Hosp_beds_per_1000",
+                        "Nurses_per_1000",
+                        "Docs_per_1000",
+                        "GII",
+                        "GPI",
+                        "Ethnic_Frac",
+                        "Linguist_Frac",
+                        "Religi_Frac",
+                        "Refugee",
+                        "Gov_Effective",
+                        "stringency_index",
+                        "CPI")
+
+
 #Penalised Logistic regression model: 
+
+model_data <- who_eu_53_countries %>% 
+              select(all_of(covariate_list_trimmed),
+                     percent_fully_vaccinated_total_pop)
+
 
 
 

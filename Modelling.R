@@ -4,13 +4,10 @@ merged_data <- read.csv("data/merged_data.csv")
 
 library(tidyverse)
 library(dplyr)
-library(Hmisc)
 library(corrplot)
-
 library(fabricatr)
-
-library(caret)
-library(glmnet)
+library(mctest)
+library(vortexR)
 
 #Remove the two countries that are not in the WHO EU region
 who_eu_53_countries <- merged_data %>% filter(!(Country.x %in% c("Kosovo","Liechtenstein")))
@@ -69,13 +66,12 @@ who_eu_53_countries <- who_eu_53_countries %>%
 #Group dataset into countries as per their fully_vaccinated_total_population percentages
 #as four quartiles
 
-who_eu_53_countries['outcome_quartiles'] <- split_quantile(who_eu_53_countries$percent_fully_vaccinated_total_pop,4)
+who_eu_53_countries['outcome_quintiles'] <- split_quantile(who_eu_53_countries$percent_fully_vaccinated_total_pop,5)
 
-View(who_eu_53_countries[,-c(1,2)] %>% group_by(outcome_quartiles) %>% summarise_all(.funs = mean, na.rm = T))
-#View(who_eu_53_countries[,-c(1,2)] %>% group_by(outcome_quartiles) %>% summarise_all(.funs = sd, na.rm = T))
+descriptives <- (who_eu_53_countries[,-c(1,2)] %>% group_by(outcome_quintiles) %>% summarise_all(.funs = mean, na.rm = T))
+#View(who_eu_53_countries[,-c(1,2)] %>% group_by(outcome_quintiles) %>% summarise_all(.funs = sd, na.rm = T))
 
-# Checking for multicollinearity between the covariates 
-
+#Complete covariate list has 26 
 full_covariate_list = c("GDP_per_cap",
                         "PHC_1.9",
                         "PHC_3.2",
@@ -103,13 +99,57 @@ full_covariate_list = c("GDP_per_cap",
                         "Flu",
                         "available_doses")
 
-corr_matrix <- cor(who_eu_53_countries[,full_covariate_list], method = "pearson", use = "complete.obs")
+#summary of the who_eu_53_countries dataframe 
+summary(who_eu_53_countries[,full_covariate_list])
 
-corr_matrix_significance <- rcorr(as.matrix(who_eu_53_countries[,full_covariate_list]), type = c("pearson","spearman"))
-corr_matrix_significance$P
+#5 covariates - Flu, Measles, DPT, available_doses, education_bachelor are missing in more than 10%
+#of all countries ; removing these variables from consideration 
 
+#Univariable analyses among the remaining 21 covariates #beta regression models
+summary(betareg(percent_fully_vaccinated_total_pop ~ GDP_per_cap, data = model_data))
+summary(betareg(percent_fully_vaccinated_total_pop ~ PHC_1.9, data = who_eu_53_countries))
+summary(betareg(percent_fully_vaccinated_total_pop ~ PHC_3.2, data = who_eu_53_countries))
+summary(betareg(percent_fully_vaccinated_total_pop ~ PHC_5.5, data = who_eu_53_countries))
+summary(betareg(percent_fully_vaccinated_total_pop ~ GINI, data = who_eu_53_countries))
+summary(betareg(percent_fully_vaccinated_total_pop ~ Literacy, data = who_eu_53_countries))
+summary(betareg(percent_fully_vaccinated_total_pop ~ Edu_primary, data = who_eu_53_countries))
+summary(betareg(percent_fully_vaccinated_total_pop ~ Edu_secondary, data = who_eu_53_countries))
+summary(betareg(percent_fully_vaccinated_total_pop ~ Health_spending_per_cap, data = who_eu_53_countries))
+summary(betareg(percent_fully_vaccinated_total_pop ~ Hosp_beds_per_1000, data = who_eu_53_countries))
+summary(betareg(percent_fully_vaccinated_total_pop ~ Nurses_per_1000, data = who_eu_53_countries))
+summary(betareg(percent_fully_vaccinated_total_pop ~ Docs_per_1000, data = who_eu_53_countries))
+summary(betareg(percent_fully_vaccinated_total_pop ~ GII, data = who_eu_53_countries))
+summary(betareg(percent_fully_vaccinated_total_pop ~ GPI, data = who_eu_53_countries))
+summary(betareg(percent_fully_vaccinated_total_pop ~ Ethnic_Frac, data = who_eu_53_countries))
+summary(betareg(percent_fully_vaccinated_total_pop ~ Linguist_Frac, data = who_eu_53_countries))
+summary(betareg(percent_fully_vaccinated_total_pop ~ Religi_Frac, data = who_eu_53_countries))
+summary(betareg(percent_fully_vaccinated_total_pop ~ Refugee, data = who_eu_53_countries))
+summary(betareg(percent_fully_vaccinated_total_pop ~ Gov_Effective, data = who_eu_53_countries))
+summary(betareg(percent_fully_vaccinated_total_pop ~ stringency_index, data = who_eu_53_countries))
+summary(betareg(percent_fully_vaccinated_total_pop ~ CPI, data = who_eu_53_countries))
+
+#Removing all those covariates that do not show trends/associations on descriptives/univariable analyses 
+#covariate_list_trimmed has 13
+covariate_list_trimmed = c("GDP_per_cap",
+                           "PHC_3.2",
+                           "PHC_5.5",
+                           "Edu_secondary",
+                           "Health_spending_per_cap",
+                           "Nurses_per_1000",
+                           "Docs_per_1000",
+                           "GII",
+                           "Ethnic_Frac",
+                           "Linguist_Frac",
+                           "Religi_Frac",
+                           "Gov_Effective",
+                           "CPI")
+
+# Checking for multicollinearity among the remaining 13 covariates in covariate_list_trimmed
+
+corr_matrix <- cor(who_eu_53_countries[,covariate_list_trimmed], method = "pearson", use = "complete.obs")
 corrplot(corr_matrix, type = "upper", order = "hclust",   tl.cex = 0.7,
          tl.col = "black", tl.srt = 45)
+
 
 ##############
 #target_group_statistics <- who_eu_53_countries %>% 
@@ -121,35 +161,13 @@ corrplot(corr_matrix, type = "upper", order = "hclust",   tl.cex = 0.7,
 #summary(target_group_statistics)
 ################
 
-covariate_list_trimmed = c("GDP_per_cap",
-                        "PHC_1.9",
-                        "GINI",
-                        "Literacy",
-                        "Edu_primary",
-                        "Edu_secondary",
-                        "Edu_bachelor",
-                        "Health_spending_per_cap",
-                        "Hosp_beds_per_1000",
-                        "Nurses_per_1000",
-                        "Docs_per_1000",
-                        "GII",
-                        "GPI",
-                        "Ethnic_Frac",
-                        "Linguist_Frac",
-                        "Religi_Frac",
-                        "Refugee",
-                        "Gov_Effective",
-                        "stringency_index",
-                        "CPI")
+model_data <- who_eu_53_countries %>% select(all_of(covariate_list_trimmed),percent_fully_vaccinated_total_pop)
 
+#x <- model.matrix(percent_fully_vaccinated_total_pop ~ .,
+           #        model.frame(~ ., model_data, na.action=na.pass))[,-1]
+#y <- model_data$percent_fully_vaccinated_total_pop
 
-#Penalised Logistic regression model: 
+betareg_full_model <- betareg(percent_fully_vaccinated_total_pop ~ ., model_data)
+mctest(betareg_full_model, type="i", corr=TRUE) ;
 
-model_data <- who_eu_53_countries %>% 
-              select(all_of(covariate_list_trimmed),
-                     percent_fully_vaccinated_total_pop)
-
-
-
-
-
+fit_regression()

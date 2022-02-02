@@ -124,6 +124,12 @@ covariate_list_trimmed = c("GDP_per_cap",
                            "Gov_Effective",
                            "CPI")
 
+# Plotting bivariate scatter plots between covariates and outcome 
+
+for (i in full_covariate_list){
+  scatter.smooth(who_eu_53_countries[,i],who_eu_53_countries$proportion_fully_vax_gen_pop, xlab = i )
+}
+
 # Checking for multicollinearity among the remaining 13 covariates in covariate_list_trimmed
 
 corr_matrix <- cor(who_eu_53_countries[,covariate_list_trimmed], method = "pearson", use = "complete.obs")

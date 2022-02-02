@@ -6,12 +6,18 @@
 source('DataMERGE.R')
 
 #install.packages('geofacet')
+#install.packages('lemon')
+#install.packages('kableExtra')
 
 library(ggplot2)
 library(geofacet)
 library(dplyr)
+library(lemon)
+library(kableExtra)
 
 df <- df %>% mutate(vax_rate = coalesce(percent_fully_vaccinated_total_pop*100, people_fully_vaccinated_per_hundred))
+
+df <- df[!df$Country.x == 'Liechtenstein',]
 
 summarise(df,
           Mean = mean(na.omit(vax_rate)),
@@ -87,21 +93,46 @@ df <- df %>% mutate(x = rep(1, length(df$country)))
 df <- df %>% mutate(y = rep(1, length(df$country)))
 
 euro_grid_70 <- ggplot(df[complete.cases(df$vax_rate)], aes(x, y)) +
-  facet_geo(~country, grid = 'europe_countries_grid1', label = 'name') +
+  facet_geo(~country, grid = 'europe_countries_grid1', label = 'code') +
   geom_point(aes(colour = vax_rate, size = population/1000000 )) +
   scale_colour_gradient2(low = "red",
                          mid = 'blue',
                        high = "blue",
-                       midpoint = 70)
+                       midpoint = 70)+
+  labs(x = '', y = '', title = '',
+       size = 'Population per million', colour = 'Vaccination Rate (%)')+
+  scale_size_continuous(breaks = c(25,50,75,100,125),
+                        range = c(1,5))+
+  theme(axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks.y=element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank())
+
 euro_grid_70
 
+ggsave(
+  filename ='euro_grid_70.png',
+  device = 'png',
+  path = 'plots',
+  dpi = 'print'
+)
+
 euro_grid <- ggplot(df[complete.cases(df$vax_rate)], aes(x, y)) +
-  facet_geo(~country, grid = 'europe_countries_grid1', label = 'name') +
+  facet_geo(~country, grid = 'europe_countries_grid1', label = 'code') +
   geom_point(aes(colour = vax_rate, size = population/1000000 )) +
   scale_colour_gradient(low ='white',
                         high = 'black')+
-  labs(x = '', y = '')
-
+  labs(x = '', y = '')+
+  theme(axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks.y=element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank())
 euro_grid
 
 euro_grid_nopop <- ggplot(df[complete.cases(df$vax_rate)], aes(x, y)) +
@@ -136,3 +167,24 @@ euro_grid_nopop_70 <- ggplot(df[complete.cases(df$vax_rate)], aes(x, y)) +
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank())
 euro_grid_nopop_70
+
+library(lemon)
+knit_print.data.frame <- lemon_print
+
+table <- df %>% 
+  select('Country' = Country.x, 
+         'Code' = `Country Code`,
+         'Vaccination rate' = vax_rate,
+         'Total Population' = population)
+
+table %>%
+  kbl(caption = 'Vaccination rate and Population of WHO Europe Countries') %>%
+  kable_classic() %>%
+  kable_styling() %>%
+  save_kable(file = "plots/table.pdf", self_contained = T)
+
+euro_count <- read.csv('data/euro_count_dict.csv')
+setdiff(df$Country.x, euro_count$Country)
+setdiff(euro_count$Country, df$Country.x)
+
+

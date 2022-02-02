@@ -140,4 +140,40 @@ betareg_full_model <- betareg(proportion_fully_vax_gen_pop ~ ., model_data)
 summary(betareg_full_model)
 mctest(betareg_full_model, type="i", corr=TRUE)
 
+# Finding out which subset of covariates is the best for the model
 
+# Initialising the loops with count and an empty list
+
+count = 1
+all_multi_beta_models <- list()
+
+# Choose one among PHC_3.2 or PHC_5.5, or don't include either 
+for (i in c('1','PHC_3.2','PHC_5.5')){
+  # Choose one among Ethnic_Frac or Linguist_Frac, or don't include either
+  for (j in c('1','Ethnic_Frac','Linguist_Frac')){
+    # Choose one among GDP_per_cap, Health_spending_per_cap,CPI,Gov_Effective,Nurses_per_1000,GII
+    # or don't include any of them
+    for (k in c('1','GDP_per_cap','Health_spending_per_cap','CPI','Gov_Effective','Nurses_per_1000','GII')){
+      # choose none, 1, 2, or all from Docs_per_1000, Edu_secondary, Religi_Frac 
+      for (l in c('1','Docs_per_1000','Edu_secondary','Religi_Frac','Docs_per_1000+Edu_secondary',
+                  'Edu_secondary+Religi_Frac','Religi_Frac+Docs_per_1000','Docs_per_1000+Edu_secondary+Religi_Frac')){
+        multi_var_formula <- paste('proportion_fully_vax_gen_pop~',paste(i,paste(j,paste(k,l,sep = '+'),sep = '+'),sep='+'))
+        multi_var_model <- betareg(multi_var_formula,model_data)
+        all_multi_beta_models[[paste("Model_",count,sep = '')]] <- multi_var_model
+        count <- count + 1
+    }
+    }
+    }
+}
+
+model_eval <- matrix(ncol = 3, nrow = length(all_multi_beta_models))
+
+for (i in seq(length(all_multi_beta_models))){
+  model_eval[i,1] <- i 
+  model_eval[i,2] <- all_multi_beta_models[[i]]$pseudo.r.squared
+  model_eval[i,3] <- BIC(all_multi_beta_models[[i]])
+}
+
+model_eval <- data.frame(model_eval)
+names(model_eval) <- c("Model_Number","Pseudo R-Square","BIC")
+View(model_eval)

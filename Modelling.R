@@ -2,12 +2,12 @@ merged_data <- read.csv("data/merged_data.csv")
 
 #Load required packages 
 
-library(tidyverse)
-library(dplyr)
-library(corrplot)
-library(fabricatr)
-library(mctest)
-library(vortexR)
+library(tidyverse) 
+library(dplyr) # For pipes and data manipulation
+library(corrplot) #Plot correlation matrix 
+library(fabricatr) #Convert outcome variable to quartiles 
+library(betareg) #Run beta regression 
+library(mctest) #Run tests for collinearity  
 
 #Remove the two countries that are not in the WHO EU region
 who_eu_53_countries <- merged_data %>% filter(!(Country.x %in% c("Kosovo","Liechtenstein")))
@@ -18,26 +18,17 @@ summary(who_eu_53_countries)
 
 #There are no countries with missing vaccination data (total population vaccinated)
 #Countries for whom data was collected outside of the EU CDC website lack data for percent_fully_vaccinated_total_pop
-#Calculating them for the 24 countries missing them
+#Calculating them for the 24 countries missing them from the data from the world bank 
 
-#For countries that lack the EU CDC percent_fully_vaccinated_total_pop statistic for the general population 
-vaccination_stats_missing_in_eu_cdc <- 
-  who_eu_53_countries %>% filter(is.na(percent_fully_vaccinated_total_pop)) %>% 
-  mutate(percent_fully_vaccinated_total_pop = people_fully_vaccinated / population) %>% 
-  select(Country.x,percent_fully_vaccinated_total_pop)
-
-#For countries that have the EU CDC percent_fully_vaccinated_total_pop statistic for the general population 
-vaccination_stats_in_eu <- who_eu_53_countries %>% 
-  filter(!is.na(who_eu_53_countries$percent_fully_vaccinated_total_pop)) %>% 
-  select(Country.x,percent_fully_vaccinated_total_pop)
-
-combined_eu_and_not <- rbind(vaccination_stats_in_eu,vaccination_stats_missing_in_eu_cdc)
-
-who_eu_53_countries <- inner_join(who_eu_53_countries,combined_eu_and_not, by = 'Country.x')
 who_eu_53_countries <- who_eu_53_countries %>%
-  select(-c(percent_fully_vaccinated_total_pop.x)) %>% 
-  rename(percent_fully_vaccinated_total_pop = percent_fully_vaccinated_total_pop.y,
-         GDP_per_cap = GDP.per.capita..current.US..,
+                       mutate(proportion_fully_vax_gen_pop = coalesce(percent_fully_vaccinated_total_pop,
+                                                  people_fully_vaccinated_per_hundred/100))
+
+#proportion_fully_vax_gen_pop is the proportion of people fully vaccinated (for all 53 countries)
+
+who_eu_53_countries <- who_eu_53_countries %>%
+  select(-c(percent_fully_vaccinated_total_pop)) %>% 
+  rename(GDP_per_cap = GDP.per.capita..current.US..,
          PHC_1.9 = Poverty.head.count.ratio.at..1.90.a.day....of.population.,
          PHC_3.2 = Poverty.head.count.ratio.at..3.20.a.day....of.population.,
          PHC_5.5 = Poverty.headcount.ratio.at..5.50.a.day....of.population.,
@@ -66,10 +57,9 @@ who_eu_53_countries <- who_eu_53_countries %>%
 #Group dataset into countries as per their fully_vaccinated_total_population percentages
 #as four quartiles
 
-who_eu_53_countries['outcome_quintiles'] <- split_quantile(who_eu_53_countries$percent_fully_vaccinated_total_pop,5)
+who_eu_53_countries['outcome_quartiles'] <- split_quantile(who_eu_53_countries$proportion_fully_vax_gen_pop,4)
 
-descriptives <- (who_eu_53_countries[,-c(1,2)] %>% group_by(outcome_quintiles) %>% summarise_all(.funs = mean, na.rm = T))
-#View(who_eu_53_countries[,-c(1,2)] %>% group_by(outcome_quintiles) %>% summarise_all(.funs = sd, na.rm = T))
+descriptives <- (who_eu_53_countries[,-c(1,2)] %>% group_by(outcome_quartiles) %>% summarise_all(.funs = mean, na.rm = T))
 
 #Complete covariate list has 26 
 full_covariate_list = c("GDP_per_cap",
@@ -102,31 +92,21 @@ full_covariate_list = c("GDP_per_cap",
 #summary of the who_eu_53_countries dataframe 
 summary(who_eu_53_countries[,full_covariate_list])
 
-#5 covariates - Flu, Measles, DPT, available_doses, education_bachelor are missing in more than 10%
+#5 covariates - Flu, Measles, DPT, available_doses, Edu_bachelor are missing in more than 10%
 #of all countries ; removing these variables from consideration 
 
 #Univariable analyses among the remaining 21 covariates #beta regression models
-summary(betareg(percent_fully_vaccinated_total_pop ~ GDP_per_cap, data = model_data))
-summary(betareg(percent_fully_vaccinated_total_pop ~ PHC_1.9, data = who_eu_53_countries))
-summary(betareg(percent_fully_vaccinated_total_pop ~ PHC_3.2, data = who_eu_53_countries))
-summary(betareg(percent_fully_vaccinated_total_pop ~ PHC_5.5, data = who_eu_53_countries))
-summary(betareg(percent_fully_vaccinated_total_pop ~ GINI, data = who_eu_53_countries))
-summary(betareg(percent_fully_vaccinated_total_pop ~ Literacy, data = who_eu_53_countries))
-summary(betareg(percent_fully_vaccinated_total_pop ~ Edu_primary, data = who_eu_53_countries))
-summary(betareg(percent_fully_vaccinated_total_pop ~ Edu_secondary, data = who_eu_53_countries))
-summary(betareg(percent_fully_vaccinated_total_pop ~ Health_spending_per_cap, data = who_eu_53_countries))
-summary(betareg(percent_fully_vaccinated_total_pop ~ Hosp_beds_per_1000, data = who_eu_53_countries))
-summary(betareg(percent_fully_vaccinated_total_pop ~ Nurses_per_1000, data = who_eu_53_countries))
-summary(betareg(percent_fully_vaccinated_total_pop ~ Docs_per_1000, data = who_eu_53_countries))
-summary(betareg(percent_fully_vaccinated_total_pop ~ GII, data = who_eu_53_countries))
-summary(betareg(percent_fully_vaccinated_total_pop ~ GPI, data = who_eu_53_countries))
-summary(betareg(percent_fully_vaccinated_total_pop ~ Ethnic_Frac, data = who_eu_53_countries))
-summary(betareg(percent_fully_vaccinated_total_pop ~ Linguist_Frac, data = who_eu_53_countries))
-summary(betareg(percent_fully_vaccinated_total_pop ~ Religi_Frac, data = who_eu_53_countries))
-summary(betareg(percent_fully_vaccinated_total_pop ~ Refugee, data = who_eu_53_countries))
-summary(betareg(percent_fully_vaccinated_total_pop ~ Gov_Effective, data = who_eu_53_countries))
-summary(betareg(percent_fully_vaccinated_total_pop ~ stringency_index, data = who_eu_53_countries))
-summary(betareg(percent_fully_vaccinated_total_pop ~ CPI, data = who_eu_53_countries))
+
+all_univariable_beta_models <- list()
+
+for (i in full_covariate_list[!full_covariate_list %in% c('Flu','DTP','available_doses','Measles','Edu_bachelor')]){
+ formula <- as.formula(paste("proportion_fully_vax_gen_pop ~",i))
+ model <- summary(betareg(formula, data = who_eu_53_countries))
+ all_univariable_beta_models[[paste(i,"_model", sep = '')]] <- model
+}
+
+print(all_univariable_beta_models) 
+#13 covariates show strong evidence of association with outcome
 
 #Removing all those covariates that do not show trends/associations on descriptives/univariable analyses 
 #covariate_list_trimmed has 13
@@ -150,24 +130,14 @@ corr_matrix <- cor(who_eu_53_countries[,covariate_list_trimmed], method = "pears
 corrplot(corr_matrix, type = "upper", order = "hclust",   tl.cex = 0.7,
          tl.col = "black", tl.srt = 45)
 
+# Fitting a multi-variable beta regression model with all 13 covariates and running 
+# tests for multi-collinearity 
 
-##############
-#target_group_statistics <- who_eu_53_countries %>% 
- # select(Country.x,
-  #       percent_fully_vaccinated_hcw,
-   #      percent_fully_vaccinated_ltcf,
-    #     percent_fully_vaccinated_above60)
-#
-#summary(target_group_statistics)
-################
+model_data <- who_eu_53_countries %>%
+  select(all_of(covariate_list_trimmed),proportion_fully_vax_gen_pop)
 
-model_data <- who_eu_53_countries %>% select(all_of(covariate_list_trimmed),percent_fully_vaccinated_total_pop)
+betareg_full_model <- betareg(proportion_fully_vax_gen_pop ~ ., model_data)
+summary(betareg_full_model)
+mctest(betareg_full_model, type="i", corr=TRUE)
 
-#x <- model.matrix(percent_fully_vaccinated_total_pop ~ .,
-           #        model.frame(~ ., model_data, na.action=na.pass))[,-1]
-#y <- model_data$percent_fully_vaccinated_total_pop
 
-betareg_full_model <- betareg(percent_fully_vaccinated_total_pop ~ ., model_data)
-mctest(betareg_full_model, type="i", corr=TRUE) ;
-
-fit_regression()

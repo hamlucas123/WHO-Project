@@ -1,6 +1,6 @@
 #install.packages("expss")
 #install.packages("qwraps2")
-install.packages('kableExtra')
+#install.packages('kableExtra')
 webshot::install_phantomjs()
 library(htmlTable)
 library(magrittr)
@@ -17,7 +17,7 @@ setwd ("~/WHO-Project")
 tot_dat <- read.csv("data/merged_data.csv")
 tot_dat <- tot_dat %>%
   mutate(vax_rate = coalesce(percent_fully_vaccinated_total_pop*100, people_fully_vaccinated_per_hundred)) 
-
+tot_dat <- tot_dat[!tot_dat$Country.x == 'Kosovo' & !tot_dat$Country.x=='Liechtenstein',]
 
 # find cut off for each percentile
 split_dat <- quantile(tot_dat$vax_rate, probs = c(0.25,0.5,0.75,1), na.rm = TRUE)
@@ -121,9 +121,10 @@ Q_FIN <- Q_FIN %>%
            "mean.Q4","sd.Q4")) %>%
   mutate(across(3:10, round, 3))
 Q_FIN$pred <- c("Health Expenditure per Capita (USD)","Physicians per 1,000 People", "Hospital Beds per 1,000 People",
-                     "GDP per Capital (USD)", "Poverty Headcount Ratio at 3.20USD a day", "Poverty Headcount Ratio at 5.50USD a day",
-                     "Education Completed (Secondary)", "Refugee Population", "Gender Inequality Index", "Ethnic Fractionalization", 
-                     "Linguistic Fractionalization", "Religious Fractionalization", "Transparency and Corruption Index",
+                "GDP per Capital (USD)", "Poverty Headcount Ratio at 3.20USD a day (% population)", 
+                "Poverty Headcount Ratio at 5.50USD a day (% population)", "Education Completed (Secondary)", 
+                "Refugee Population by country or territory of Asylum", "Gender Inequality Index", "Ethnic Fractionalization Index", 
+                     "Linguistic Fractionalization Index", "Religious Fractionalization Index", "Transparency and Corruption Index",
                      "Government Stringency Index", "Government Effectiveness")
 row.names(Q_FIN) <- NULL
 
@@ -139,7 +140,7 @@ htmlTable(Q_FIN,
           cgroup = c("","< 25th Percentile", "25th-50th Percentile", 
                      "50th-75th Percentile", "> 75th Percentile"),
           n.cgroup = c(2,2,2,2,2)) %>%
-  save_kable(file = "plots/split_vax.png")
+  save_kable(file = "plots/split_vax.pdf")
 
 
                          

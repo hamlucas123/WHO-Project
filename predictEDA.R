@@ -1,13 +1,15 @@
 #install.packages("expss")
-install.packages("qwraps2")
+#install.packages("qwraps2")
+install.packages('kableExtra')
+webshot::install_phantomjs()
 library(htmlTable)
 library(magrittr)
 library(dplyr)
 library(ggplot2)
 library(expss)
-library(gtsummary)
 library(tidyr)
 library(qwraps2)
+library(kableExtra)
 
 
 
@@ -116,44 +118,30 @@ Q_FIN <- Q_FIN %>%
   arrange(cat) %>%
   select(c("pred","N_tot", "mean.Q1","sd.Q1",
            "mean.Q2","sd.Q2","mean.Q3","sd.Q3",
-           "mean.Q4","sd.Q4"))
-rownames(Q_FIN) <- 
+           "mean.Q4","sd.Q4")) %>%
+  mutate(across(3:10, round, 3))
+Q_FIN$pred <- c("Health Expenditure per Capita (USD)","Physicians per 1,000 People", "Hospital Beds per 1,000 People",
+                     "GDP per Capital (USD)", "Poverty Headcount Ratio at 3.20USD a day", "Poverty Headcount Ratio at 5.50USD a day",
+                     "Education Completed (Secondary)", "Refugee Population", "Gender Inequality Index", "Ethnic Fractionalization", 
+                     "Linguistic Fractionalization", "Religious Fractionalization", "Transparency and Corruption Index",
+                     "Government Stringency Index", "Government Effectiveness")
+row.names(Q_FIN) <- NULL
+
 htmlTable(Q_FIN,
           header = c("Country-level Predictors",
             "Total Number", "Mean", 
             "Std", "Mean", "Std","Mean", 
             "Std", "Mean", "Std"),
+          rnames = FALSE,
           rgroup = c("Health System", "General Socioeconomic Status",
                      "Social/Cultural","Governance"),
           n.rgroup = c(3,4,5,3),
           cgroup = c("","< 25th Percentile", "25th-50th Percentile", 
                      "50th-75th Percentile", "> 75th Percentile"),
-          n.cgroup = c(2,2,2,2,2))
+          n.cgroup = c(2,2,2,2,2)) %>%
+  save_kable(file = "plots/split_vax.png")
 
 
-
-
-summary_QFIN <- 
-  list("Health System" = 
-         list("Health Expenditure per Capita" = Q_FIN["Health.expenditure.per.capita..current.US...",],
-              "Hospital Beds per 1,000 People" = Q_FIN["Hospital.beds..per.1.000.people.",],
-              "Physicians per 1,000 People" = Q_FIN["Physicians..per.1.000.people.",]),
-       "General Socioeconomic Status" =
-         list("GDP per Capital" = Q_FIN["GDP.per.capita..current.US..", ],
-              "Poverty Headcount Ratio at 3.2 a day" = Q_FIN["Poverty.head.count.ratio.at..3.20.a.day....of.population.",],
-              "Poverty Headcount Ratio at 5.5 a day" = Q_FIN["Poverty.headcount.ratio.at..5.50.a.day....of.population.",],
-              "Education (Secondary)" = Q_FIN["Education..at.least.completed.upper.secondary..population.25...total......cumulative.",]),
-       "Social/Cultural" = 
-         list("Gender Inequality Index" = Q_FIN["Gender.Inequality.Index..GII.",],
-              "Linguistic Fractionalization" = Q_FIN["linguisticFractionalization",],
-              "Ethnic Fractionalization" = Q_FIN["ethnicFractionalization",],
-              "Religious Fractionalization" = Q_FIN["religiousFractionalization", ],
-              "Refugee Population" = Q_FIN["Refugee.population.by.country.or.territory.of.asylum",]),
-       "Governance" = 
-         list("Government Stringency Index" = Q_FIN["stringency_index", ],
-              "Government Effectiveness" = Q_FIN["Government.Effectiveness.Index.Rank", ],
-              "Transparency and Correuption Index" = Q_FIN["CPI.score.2020..Corruption.Index.",]))
-sum_COM <- summary_table(Q_FIN, summaries = summary_QFIN, by = c("pred"))
                          
                          
                          

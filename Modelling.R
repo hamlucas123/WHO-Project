@@ -109,18 +109,16 @@ print(all_univariable_beta_models)
 #13 covariates show strong evidence of association with outcome
 
 #Removing all those covariates that do not show trends/associations on descriptives/univariable analyses 
-#covariate_list_trimmed has 13
+#covariate_list_trimmed has 13 (11 - changed edu secondary to bachelor)
 covariate_list_trimmed = c("GDP_per_cap",
-                           "PHC_3.2",
                            "PHC_5.5",
-                           "Edu_secondary",
+                           "Edu_bachelor",
                            "Health_spending_per_cap",
                            "Nurses_per_1000",
                            "Docs_per_1000",
                            "GII",
                            "Ethnic_Frac",
                            "Linguist_Frac",
-                           "Religi_Frac",
                            "Gov_Effective",
                            "CPI")
 
@@ -153,16 +151,15 @@ mctest(betareg_full_model, type="i", corr=TRUE)
 count = 1
 all_multi_beta_models <- list()
 
-# Choose one among PHC_3.2 or PHC_5.5, or don't include either 
-for (i in c('1','PHC_3.2','PHC_5.5')){
+# Choose PHC_5.5, or don't include  
+for (i in c('1','PHC_5.5')){
   # Choose one among Ethnic_Frac or Linguist_Frac, or don't include either
   for (j in c('1','Ethnic_Frac','Linguist_Frac')){
-    # Choose one among GDP_per_cap, Health_spending_per_cap,CPI,Gov_Effective,Nurses_per_1000,GII
+    # Choose one among GDP_per_cap, Health_spending_per_cap,CPI,Gov_Effective,Nurses_per_1000
     # or don't include any of them
-    for (k in c('1','GDP_per_cap','Health_spending_per_cap','CPI','Gov_Effective','Nurses_per_1000','GII')){
-      # choose none, 1, 2, or all from Docs_per_1000, Edu_secondary, Religi_Frac 
-      for (l in c('1','Docs_per_1000','Edu_secondary','Religi_Frac','Docs_per_1000+Edu_secondary',
-                  'Edu_secondary+Religi_Frac','Religi_Frac+Docs_per_1000','Docs_per_1000+Edu_secondary+Religi_Frac')){
+    for (k in c('1','GDP_per_cap','Health_spending_per_cap','CPI','Gov_Effective','GII','Nurses_per_1000')){
+      # choose none, 1, or all from Docs_per_1000, Edu_bachelor, 
+      for (l in c('1','Docs_per_1000','Edu_bachelor','Docs_per_1000+Edu_bachelor')){
         multi_var_formula <- paste('proportion_fully_vax_gen_pop~',paste(i,paste(j,paste(k,l,sep = '+'),sep = '+'),sep='+'))
         multi_var_model <- betareg(multi_var_formula,model_data)
         all_multi_beta_models[[paste("Model_",count,sep = '')]] <- multi_var_model
@@ -183,3 +180,7 @@ for (i in seq(length(all_multi_beta_models))){
 model_eval <- data.frame(model_eval)
 names(model_eval) <- c("Model_Number","Pseudo R-Square","BIC")
 View(model_eval)
+
+p <- ggplot(model_data, aes(Gov_Effective, Ethnic_Frac))
+p <- p + geom_point(aes(size = PHC_5.5))
+p <- p + geom_point(aes(color = proportion_fully_vax_gen_pop))

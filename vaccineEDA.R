@@ -85,8 +85,29 @@ euro_grid <- ggplot(df, aes(x, y)) +
 
 euro_grid
 
+vul_pop <- df %>%
+  select(`Country Code`, colnames(df)[c(59,64,69)])
 
+vul_pop_long <- pivot_longer(
+  data            = vul_pop,
+  cols            = colnames(df)[c(59,64,69)],
+  names_to        = 'group',
+  values_to       = 'vax_rate')
 
+vul_pop_grid <- ggplot(vul_pop_long, aes(group, vax_rate*100, fill = group)) +
+  facet_geo(~`Country Code`, grid = mygrid, label = 'code')+
+  geom_col()+
+  labs(x = '', y = '', title = '',
+       size = 'Population per million', fill = 'Vaccination Rate (%)')+
+  scale_size_continuous(breaks = c(25,50,75,100,125),
+                        range = c(1,5))+
+  theme(axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks.y=element_blank())
+
+vul_pop_grid
 
 
 

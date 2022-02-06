@@ -21,6 +21,7 @@ To generate the analysis, the following scripts are to be used:
 //
 
 //////////////////////////////////////////////////////////////
+
 Please install the required packages by running the following codes:
 install.packages("dplyr")
 install.packages("ggplot2")
@@ -47,6 +48,7 @@ To run the script:
 2. Select all code and press run
 
 ///////////////////////////////////////////////////////////////
+
 Folder: data
 The following files are the resulting datasets after cleaning:
 1. OWD_child.csv

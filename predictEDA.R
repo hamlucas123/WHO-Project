@@ -135,7 +135,8 @@ htmlTable(Q_FIN,
           n.rgroup = c(3,4,5,3),
           cgroup = c("","< 25th Percentile", "25th-50th Percentile", 
                      "50th-75th Percentile", "> 75th Percentile"),
-          n.cgroup = c(2,2,2,2,2)) 
+          n.cgroup = c(2,2,2,2,2)) %>%
+  save_kable(file = "plots/split_vax.pdf")
 
 
                          

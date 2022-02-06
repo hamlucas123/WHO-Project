@@ -1,14 +1,10 @@
-#install.packages("expss")
-#install.packages("qwraps2")
+
 #install.packages('kableExtra')
 webshot::install_phantomjs()
 library(htmlTable)
-library(magrittr)
 library(dplyr)
 library(ggplot2)
-library(expss)
 library(tidyr)
-library(qwraps2)
 library(kableExtra)
 
 
@@ -139,8 +135,7 @@ htmlTable(Q_FIN,
           n.rgroup = c(3,4,5,3),
           cgroup = c("","< 25th Percentile", "25th-50th Percentile", 
                      "50th-75th Percentile", "> 75th Percentile"),
-          n.cgroup = c(2,2,2,2,2)) %>%
-  save_kable(file = "plots/split_vax.pdf")
+          n.cgroup = c(2,2,2,2,2)) 
 
 
                          

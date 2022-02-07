@@ -166,15 +166,15 @@ map_plot <- ggplot() +geom_polygon(data = euroCoords,
        fill = 'Vaccination Rate (%)')
 map_plot
 
+aspect_ratio <- 2.5
+height <- 7
 
 ggsave(
   filename ='map_plot.png',
   device = 'png',
   path = 'plots',
   dpi = 'print',
-  height = 800,
-  width = 400,
-  limitsize = F
+  height = 5 , width = 8
 )
 
 

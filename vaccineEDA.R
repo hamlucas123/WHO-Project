@@ -117,29 +117,66 @@ library(grid)
 library(rworldmap)
 worldMap <- getMap()
 
-indEuro <- which(worldMap$NAME%in%euro_count$Country)
+count <- worldMap$NAME[which(worldMap$NAME%in%df$Country.x)]
+
+setdiff(df$Country.x,count)
+
+df$Country.x[df$Country.x == 'Bosnia and Herzegovina'] <- 'Bosnia and Herz.'
+df$Country.x[df$Country.x == 'Czech Republic'] <- 'Czech Rep.'
+df$Country.x[df$Country.x == 'Kyrgyz Republic'] <- 'Kyrgyzstan'
+df$Country.x[df$Country.x == 'North Macedonia'] <- 'Macedonia'
+df$Country.x[df$Country.x == 'Russian Federation'] <- 'Russia'
+df$Country.x[df$Country.x == 'Slovak Republic'] <- 'Slovakia'
+
+count <- worldMap$NAME[which(worldMap$NAME%in%df$Country.x)]
+setdiff(df$Country.x,count)
+
+indEuro <- which(worldMap$NAME%in%df$Country.x)
 
 euroCoords <- lapply(indEuro, function(i){
-  df <- 
+  euro_df <- 
     data.frame(worldMap@polygons[[i]]@Polygons[[1]]@coords)
-  df$region = as.character(worldMap$NAME[i])
-  colnames(df) <- list('long','lat','region')
-  return(df)
+  euro_df$region = as.character(worldMap$NAME[i])
+  colnames(euro_df) <- list('long','lat','region')
+  return(euro_df)
 })
 
 euroCoords <- do.call('rbind',euroCoords)
 
-europeUnionTable <- data.frame(country = euro_count$Country, value = df$vax_rate)
+europeUnionTable <- data.frame(country = df$Country.x, value = df$vax_rate)
 
 euroCoords$value <- europeUnionTable$value[match(euroCoords$region,europeUnionTable$country)]
 
-P <- ggplot() +geom_polygon(data = euroCoords,
-                            aes(x = long, y= lat, group = region, fill = value))+
+map_plot <- ggplot() +geom_polygon(data = euroCoords,
+                            aes(x = long, y= lat, group = region, fill = value), colour = "black", size = 0.3)+
   scale_fill_gradient2(low = "red",
                        mid = 'blue',
-                       high = "blue",
-                       midpoint = 70)
-P
+                       high = "black",
+                       midpoint = 70,
+                       limits = c(0,100))+ 
+  theme(#panel.grid.minor = element_line(colour = NA), panel.grid.minor = element_line(colour = NA),
+    #panel.background = element_rect(fill = NA, colour = NA),
+    axis.text.x = element_blank(),
+    axis.text.y = element_blank(), axis.ticks.x = element_blank(),
+    axis.ticks.y = element_blank(), axis.title = element_blank(),
+    #rect = element_blank(),
+    plot.margin = unit(0 * c(-1.5, -1.5, -1.5, -1.5), "lines"))+
+  coord_map(xlim = c(-20, 80),  ylim = c(32, 71))+
+  labs(x = '', y = '', title = '',
+       fill = 'Vaccination Rate (%)')
+map_plot
+
+
+ggsave(
+  filename ='map_plot.png',
+  device = 'png',
+  path = 'plots',
+  dpi = 'print',
+  height = 800,
+  width = 400,
+  limitsize = F
+)
+
 
 # #############################end###################################
 # 

@@ -12,7 +12,8 @@ library(kableExtra)
 setwd ("~/WHO-Project")
 tot_dat <- read.csv("data/merged_data.csv")
 tot_dat <- tot_dat %>%
-  mutate(vax_rate = coalesce(percent_fully_vaccinated_total_pop*100, people_fully_vaccinated_per_hundred)) 
+  mutate(vax_rate = coalesce(percent_fully_vaccinated_total_pop*100, people_fully_vaccinated_per_hundred)) %>%
+  mutate(available_doses_per_cap = available_doses/ population)
 tot_dat <- tot_dat[!tot_dat$Country.x == 'Kosovo' & !tot_dat$Country.x=='Liechtenstein',]
 
 # find cut off for each percentile
@@ -36,14 +37,17 @@ cat_dat <- function(x) {
 }
 # table of predictors and categories
 healthsys <- c("Hospital.beds..per.1.000.people.", "Health.expenditure.per.capita..current.US...", 
-               "Physicians..per.1.000.people." )
-gen_se <- c("GDP.per.capita..current.US..", "Poverty.head.count.ratio.at..3.20.a.day....of.population.", 
+               "Physicians..per.1.000.people.", "Nurses.and.midwives..per.1.000.people." )
+gen_se <- c("GDP.per.capita..current.US..", "Gini.index..World.Bank.estimate.", 
             "Poverty.headcount.ratio.at..5.50.a.day....of.population.",
-            "Education..at.least.completed.upper.secondary..population.25...total......cumulative.")
-soc <- c("Gender.Inequality.Index..GII.", "linguisticFractionalization", "ethnicFractionalization",
+            "Adult.Literacy.rate....of.people.ages.15.and.above.", 
+            "Education..at.least.completed.upper.secondary..population.25...total......cumulative.",
+            "Education..at.least.Bachelor.s.or.equivalent..population.25...total......cumulative." )
+soc <- c("Gender.Inequality.Index..GII.", "Gender.Parity.Index..GPI.", "linguisticFractionalization", "ethnicFractionalization",
          "religiousFractionalization", 
          "Refugee.population.by.country.or.territory.of.asylum")
-gov <- c("stringency_index", "Government.Effectiveness.Index.Rank", "CPI.score.2020..Corruption.Index.")
+gov <- c("stringency_index", "Government.Effectiveness.Index.Rank", "CPI.score.2020..Corruption.Index.",
+         "Flu.Vax.Value", "available_doses_per_cap")
 
 #############################################
 # for up to the 25th percentile
@@ -115,13 +119,17 @@ Q_FIN <- Q_FIN %>%
   select(c("pred","N_tot", "mean.Q1","sd.Q1",
            "mean.Q2","sd.Q2","mean.Q3","sd.Q3",
            "mean.Q4","sd.Q4")) %>%
-  mutate(across(3:10, round, 3))
-Q_FIN$pred <- c("Health Expenditure per Capita (USD)","Physicians per 1,000 People", "Hospital Beds per 1,000 People",
-                "GDP per Capital (USD)", "Poverty Headcount Ratio at 3.20USD a day (% population)", 
-                "Poverty Headcount Ratio at 5.50USD a day (% population)", "Education Completed (Secondary)", 
-                "Refugee Population by country or territory of Asylum", "Gender Inequality Index", "Ethnic Fractionalization Index", 
-                     "Linguistic Fractionalization Index", "Religious Fractionalization Index", "Transparency and Corruption Index",
-                     "Government Stringency Index", "Government Effectiveness")
+  mutate(across(3:10, round, 2))
+Q_FIN$pred <- c("Health Expenditure per Capita (USD)","Nurses and midwives per 1,000 people.",  
+                "Physicians per 1,000 People", "Hospital Beds per 1,000 People",
+                "GDP per Capital (USD)",  "Poverty Headcount Ratio at 5.50USD a day (% population)", 
+                "Gini Index", "Adult Literacy rate of people ages 15 and above" ,
+                "Education Completed (Upper Secondary)", "Education Completed (Bachelors or equivalent)",
+                "Gender Parity Index","Refugee Population by country or territory of Asylum", 
+                "Gender Inequality Index", "Ethnic Fractionalization Index", "Linguistic Fractionalization Index", 
+                "Religious Fractionalization Index", "Transparency and Corruption Index",
+                     "Government Stringency Index", "Flu Vaccination Value", "Government Effectiveness",
+                "Available doses per Capita")
 row.names(Q_FIN) <- NULL
 
 htmlTable(Q_FIN,

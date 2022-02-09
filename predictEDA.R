@@ -31,18 +31,18 @@ sumfun <- function(x) {
 cat_dat <- function(x) {
   ifelse(x$pred %in% healthsys, 1, 
          ifelse(x$pred %in% gen_se, 2,
-                ifelse(x$pred %in% soc, 3,
-                       ifelse(x$pred %in% gov, 4,
-                              0))))
+                ifelse(x$pred %in% edu, 3,
+                ifelse(x$pred %in% soc, 4,
+                       ifelse(x$pred %in% gov, 5,
+                              0)))))
 }
 # table of predictors and categories
 healthsys <- c("Hospital.beds..per.1.000.people.", "Health.expenditure.per.capita..current.US...", 
                "Physicians..per.1.000.people.", "Nurses.and.midwives..per.1.000.people." )
 gen_se <- c("GDP.per.capita..current.US..", "Gini.index..World.Bank.estimate.", 
-            "Poverty.headcount.ratio.at..5.50.a.day....of.population.",
-            "Adult.Literacy.rate....of.people.ages.15.and.above.", 
-            "Education..at.least.completed.upper.secondary..population.25...total......cumulative.",
-            "Education..at.least.Bachelor.s.or.equivalent..population.25...total......cumulative." )
+            "Poverty.headcount.ratio.at..5.50.a.day....of.population.")
+edu <- c("Adult.Literacy.rate....of.people.ages.15.and.above.", 
+         "Education..at.least.Bachelor.s.or.equivalent..population.25...total......cumulative.")
 soc <- c("Gender.Inequality.Index..GII.", "Gender.Parity.Index..GPI.", "linguisticFractionalization", "ethnicFractionalization",
          "religiousFractionalization", 
          "Refugee.population.by.country.or.territory.of.asylum")
@@ -120,15 +120,17 @@ Q_FIN <- Q_FIN %>%
            "mean.Q2","sd.Q2","mean.Q3","sd.Q3",
            "mean.Q4","sd.Q4")) %>%
   mutate(across(3:10, round, 2))
+Q_FIN[11,-c(1,2)] <- as.integer(Q_FIN[11,-c(1,2)])
+Q_FIN[18,c(3,4)] <- "NA"
 Q_FIN$pred <- c("Health Expenditure per Capita (USD)","Nurses and midwives per 1,000 people.",  
                 "Physicians per 1,000 People", "Hospital Beds per 1,000 People",
-                "GDP per Capital (USD)",  "Poverty Headcount Ratio at 5.50USD a day (% population)", 
+                "GDP per Capita (USD)",  "Poverty Headcount Ratio at 5.50USD a day (% population)", 
                 "Gini Index", "Adult Literacy rate of people ages 15 and above" ,
-                "Education Completed (Upper Secondary)", "Education Completed (Bachelors or equivalent)",
+                "Education Completed (Bachelors or equivalent)",
                 "Gender Parity Index","Refugee Population by country or territory of Asylum", 
                 "Gender Inequality Index", "Ethnic Fractionalization Index", "Linguistic Fractionalization Index", 
                 "Religious Fractionalization Index", "Transparency and Corruption Index",
-                     "Government Stringency Index", "Flu Vaccination Value", "Government Effectiveness",
+                     "Government Stringency Index", "% of population aged 65+ Vaccinated against Influenza", "Government Effectiveness",
                 "Available doses per Capita")
 row.names(Q_FIN) <- NULL
 
@@ -138,9 +140,9 @@ htmlTable(Q_FIN,
             "Std", "Mean", "Std","Mean", 
             "Std", "Mean", "Std"),
           rnames = FALSE,
-          rgroup = c("Health System", "General Socioeconomic Status",
+          rgroup = c("Health System", "General Socioeconomic Status", "Education",
                      "Social/Cultural","Governance"),
-          n.rgroup = c(3,4,5,3),
+          n.rgroup = c(4,3,2,6,5),
           cgroup = c("","< 25th Percentile", "25th-50th Percentile", 
                      "50th-75th Percentile", "> 75th Percentile"),
           n.cgroup = c(2,2,2,2,2)) %>%

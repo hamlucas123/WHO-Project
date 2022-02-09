@@ -188,6 +188,9 @@ map_plot <- ggplot() +geom_polygon(data = euroCoords,
     axis.text.x = element_blank(),
     axis.text.y = element_blank(), axis.ticks.x = element_blank(),
     axis.ticks.y = element_blank(), axis.title = element_blank(),
+    panel.border = element_blank(), panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    panel.background = element_blank(),
     #rect = element_blank(),
     plot.margin = unit(0 * c(-1.5, -1.5, -1.5, -1.5), "lines"))+
   coord_map(xlim = c(-20, 80),  ylim = c(32, 71))+

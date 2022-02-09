@@ -24,6 +24,9 @@ sum(is.na(merg_dat["percent_fully_vaccinated_hcw"]))
 sum(is.na(merg_dat["percent_fully_vaccinated_above60"]))
 #25 missing for those above 60
 
+sum(is.na(merg_dat['Flu.Vax.Value']))
+#30 missing for flux vax
+
 #Review GDP
 sum(is.na(merg_dat[,3]))
 #No missing values for GDP
@@ -275,7 +278,7 @@ flu_60plus <- ggplot(merg_dat, aes(x=Flu.Vax.Value, y=percent_fully_vaccinated_a
   scale_y_continuous(breaks = seq(0, 100, by = 20),
                      limits =c(0,100)) +
   labs(y='Older Adults Fully Vaccinated (%)', 
-       x ='Flu Vax Value -[NEED TO ADJUST]') +
+       x ='Flu Vaccination Uptake in Older Adults (%)') +
   theme_minimal() +
   theme(plot.title = element_text(size = 12, family = "Tahoma", face = "bold",hjust = 0.5),
         text=element_text(family = "Tahoma"),
@@ -356,19 +359,19 @@ cor_hcw <- select(cor_hcw,-c(total_vaccinations,people_vaccinated,DTP..Child.Vax
                              linguisticFractionalization,
                              religiousFractionalization,
                              Flu.Vax.Value))
-cor_ltcf <- select(select(cor_ltcf,-c(total_vaccinations,people_vaccinated,DTP..Child.Vax.,MEASLES..Child.Vax.,stringency_index,
-                                      Education..at.least.completed.primary..population.25..years..total......cumulative.,
-                                      Education..at.least.completed.upper.secondary..population.25...total......cumulative.,
-                                      Education..at.least.Bachelor.s.or.equivalent..population.25...total......cumulative.,
-                                      Refugee.population.by.country.or.territory.of.asylum,
-                                      ethnicFractionalization,
-                                      linguisticFractionalization,
-                                      religiousFractionalization,
-                                      Flu.Vax.Value)))
-
+cor_ltcf <- select(cor_ltcf,-c(total_vaccinations,people_vaccinated,DTP..Child.Vax.,MEASLES..Child.Vax.,stringency_index,
+                               Education..at.least.completed.primary..population.25..years..total......cumulative.,
+                               Education..at.least.completed.upper.secondary..population.25...total......cumulative.,
+                               Education..at.least.Bachelor.s.or.equivalent..population.25...total......cumulative.,
+                               Refugee.population.by.country.or.territory.of.asylum,
+                               ethnicFractionalization,
+                               linguisticFractionalization,
+                               religiousFractionalization,
+                               Flu.Vax.Value))
 cor_above60 <- select(cor_above60,-c(linguisticFractionalization))
 
+cor_ltcf
 #write files
 write.csv(cor_above60,'Correlation table Older Adults.csv')
 write.csv(cor_hcw, 'Correlation table Health Care Workers.csv')
-write.csv(cor_ltcf,'Correlation table LTCF')
+write.csv(cor_ltcf,'Correlation table LTCF.csv')

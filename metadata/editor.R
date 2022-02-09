@@ -55,7 +55,7 @@ sub_meta$Source <- c("World Bank/OECD", "WHO", "World Bank", "World Bank", "Worl
 library(ggplot2)
 library(gridExtra)
 
-
+# c("World Bank/OECD", "WHO", "World Bank", "World Bank", "World Bank", "World Bank", "UNESCO", "UNESCO", "UNESCO", "UNESCO", "UNESCO", "WHO", "WHO", "WHO", "UNHCR", "Transparency International", "Pew Research, Harvard University", "Pew Research, Harvard University", "Pew Research, Harvard University", "Oxford COVID-19 GOvernment Response Tracker", "World Bank", "UNDP")
 png("metadata/test.png", height = 500, width=1000)
 p<-tableGrob(sub_meta)
 grid.arrange(p)

@@ -1,10 +1,9 @@
 library(readr)
 library(readxl)
 library(dplyr)
-library(tidyr)
 library(lubridate, warn.conflicts = FALSE)
 
-owid <- read_excel("data/owid-covid-data.xlsx")
+owid <- read_excel("data/owid-covid-data.xlsx", guess_max = 50000)
 euro <- read_csv("data/euro_count_dict.csv")
 
 # Filter by European country
@@ -33,14 +32,6 @@ owid <- owid[c("location",
 # Make a copy
 owid2 <- owid
 
-Bosnia <- owid2 %>% filter(location == "Bosnia and Herzegovina") # 2021-11-04
-Monaco <- owid2 %>% filter(location == "Monaco") # 2021-09-16
-
-Uzbek2 <- owid2 %>% filter(location == "Uzbekistan") %>% fill(c(total_vaccinations:new_vaccinations), .direction="up")
-
-Bosnia <- Bosnia %>% filter(date == "2021-11-04")
-Monaco <- Monaco %>% filter(date == "2021-09-16")
-
 # owid_fix <- owid %>% fill(people_fully_vaccinated, .direction = "up")
 owid <- owid %>% group_by(location) %>% fill(c(total_vaccinations:new_vaccinations), .direction="up")
 
@@ -59,11 +50,6 @@ owid3 <- owid %>% filter(date == "2021-12-31")
 # Turkmenistan's latest data is 2021-08-29
 owid2 <- owid2 %>% filter(location == "Turkmenistan")
 dfowid <- rbind(owid3, owid2)
-dfowid <- dfowid[-c(8, 32), ] # remove Monaco and Bosnia 
-
-dfowid <- rbind(dfowid, Bosnia) # add full Bosnia row
-dfowid <- rbind(dfowid, Monaco) # add full Monaco row
-
 owid_vaccines <- dfowid
-rm(dfowid, euro, owid, owid2, owid3, Bosnia, Monaco, Uzbek2)
+rm(dfowid, euro, owid, owid2, owid3)
 # rm(list=setdiff(ls(), "owid_vaccines"))

@@ -16,6 +16,7 @@ library(geofacet)
 library(dplyr)
 library(lemon)
 library(kableExtra)
+library(tidyr)
 
 euro_count <- read.csv('data/euro_count_dict.csv')
 
@@ -89,7 +90,11 @@ euro_grid <- ggplot(df, aes(x, y)) +
 euro_grid
 
 vul_pop <- df %>%
-  select(`Country Code`, colnames(df)[c(59,64,69)])
+  select(`Country.Code`, colnames(df)[c(59,64,69,71)])
+
+vul_pop <- vul_pop[complete.cases(vul_pop),]
+vul_pop <- vul_pop[with(vul_pop, order(-vax_rate)),]
+vul_pop <- vul_pop[,-5]
 
 vul_pop_long <- pivot_longer(
   data            = vul_pop,
@@ -97,20 +102,44 @@ vul_pop_long <- pivot_longer(
   names_to        = 'group',
   values_to       = 'vax_rate')
 
-vul_pop_grid <- ggplot(vul_pop_long, aes(group, vax_rate*100, fill = group)) +
-  facet_geo(~`Country Code`, grid = mygrid, label = 'code')+
-  geom_col()+
-  labs(x = '', y = '', title = '',
-       size = 'Population per million', fill = 'Vaccination Rate (%)')+
-  scale_size_continuous(breaks = c(25,50,75,100,125),
-                        range = c(1,5))+
+vul_pop_long$group <- factor(vul_pop_long$group, labels = c("Aged above 60 years",
+                                                            "Healthcare Worker",
+                                                            'Long Term Foster Care Home'))
+
+
+vul_pop_grid <- ggplot(vul_pop_long)+
+  geom_bar(aes(x = group, y = vax_rate*100, fill = group), position = "stack", stat = "identity")+
+  facet_wrap(~Country.Code)+
   theme(axis.title.x=element_blank(),
         axis.text.x=element_blank(),
-        axis.ticks.x=element_blank(),
-        axis.text.y=element_blank(),
-        axis.ticks.y=element_blank())
+        axis.ticks.x=element_blank())+
+  labs(
+    y = 'Vaccination rate (%)',
+    fill = 'Vulnerable group')
 
 vul_pop_grid
+
+# 
+# vul_pop_long <- pivot_longer(
+#   data            = vul_pop,
+#   cols            = colnames(df)[c(59,64,69)],
+#   names_to        = 'group',
+#   values_to       = 'vax_rate')
+# 
+# vul_pop_grid <- ggplot(vul_pop_long, aes(group, vax_rate*100, fill = group)) +
+#   facet_geo(~`Country Code`, grid = mygrid, label = 'code')+
+#   geom_col()+
+#   labs(x = '', y = '', title = '',
+#        size = 'Population per million', fill = 'Vaccination Rate (%)')+
+#   scale_size_continuous(breaks = c(25,50,75,100,125),
+#                         range = c(1,5))+
+#   theme(axis.title.x=element_blank(),
+#         axis.text.x=element_blank(),
+#         axis.ticks.x=element_blank(),
+#         axis.text.y=element_blank(),
+#         axis.ticks.y=element_blank())
+# 
+# vul_pop_grid
 
 ##world map
 library(grid)
@@ -176,6 +205,9 @@ ggsave(
   dpi = 'print',
   height = 5 , width = 8
 )
+
+
+
 
 
 # #############################end###################################

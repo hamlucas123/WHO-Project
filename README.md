@@ -85,12 +85,13 @@ This folder holds the scripts used to clean the raw data from sources. Also in t
 2. corruption_CLEAN.R
 3. covid_stringencyCLEAN.R
 4. eth_fracCLEAN.R
-5. eu_vaccine_R_script.R
-6. owidcovidCLEAN.R
-7. vax_childmmrCLEAN.R
-8. vax_fluCLEAN.R
-9. wgiCLEAN.R
-10. worldbankCLEAN.R
+5. euro_count_dict.R
+6. eu_vaccine_R_script.R
+7. owidcovidCLEAN.R
+8. vax_childmmrCLEAN.R
+9. vax_fluCLEAN.R
+10. wgiCLEAN.R
+11. worldbankCLEAN.R
 
 
 ## Analysis

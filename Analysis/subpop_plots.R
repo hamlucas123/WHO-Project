@@ -5,7 +5,6 @@ library(tidyverse)
 library(extrafont)
 library(ggpubr)
 
-setwd("/Users/Haj/Documents/Health Data Science/Modules II/WHO-Project")
 #Load data
 merg_dat <-  read.csv(file = 'data/merged_data.csv')
 #Check data

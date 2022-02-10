@@ -103,14 +103,22 @@ This folder holds the scripts used to perform the analysis.
 - Runs a multivariable beta regression model with all potential predictors and calculates VIF andn tolerance scores (to determine multicollinearity).
 - Searches for the best model by performing an exhaustive subset search among all covariates (given no multicollinearity) and ranks models based on R-Squared statistic.
 - Runs likelihood ratio tests among the top 10 models to choose the final one. 
+
+
 2. predictEDA.R
+
 -  Tabulated country-level predictors according to quartiles of fully vaccinated countries 
 -  For each country-level predictor, the number of countries included is shown. The mean and standard deviation are also calculated for each quartile.
 -  Table of countries in each quartile produced 
+
+
 3. subpop_plots.R
+
 - Used to produce correlation matrices between the subpopulations and the predictors.
-- Graphs showing the correlations between Older Adults and COVID vaccination uptake is alson in this script.
+- Graphs showing the correlations between Older Adults and COVID vaccination uptake is also in this script.
+
 4. vaccineEDA.R
+
 - Summary statistics for vaccination
 - Table of vaccination rates across WHO Europe countries
 - Bar chart of vaccination rate in vulnerable populations

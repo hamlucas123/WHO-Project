@@ -1,4 +1,4 @@
-
+#install.packages("gridExtra")
 #install.packages('kableExtra')
 webshot::install_phantomjs()
 library(htmlTable)
@@ -6,6 +6,8 @@ library(dplyr)
 library(ggplot2)
 library(tidyr)
 library(kableExtra)
+library(gridExtra)
+library(grid)
 
 
 
@@ -34,7 +36,8 @@ cat_dat <- function(x) {
                 ifelse(x$pred %in% edu, 3,
                 ifelse(x$pred %in% soc, 4,
                        ifelse(x$pred %in% gov, 5,
-                              0)))))
+                              ifelse(x$pred %in% other, 6,
+                              0))))))
 }
 # table of predictors and categories
 healthsys <- c("Hospital.beds..per.1.000.people.", "Health.expenditure.per.capita..current.US...", 
@@ -46,8 +49,8 @@ edu <- c("Adult.Literacy.rate....of.people.ages.15.and.above.",
 soc <- c("Gender.Inequality.Index..GII.", "Gender.Parity.Index..GPI.", "linguisticFractionalization", "ethnicFractionalization",
          "religiousFractionalization", 
          "Refugee.population.by.country.or.territory.of.asylum")
-gov <- c("stringency_index", "Government.Effectiveness.Index.Rank", "CPI.score.2020..Corruption.Index.",
-         "Flu.Vax.Value", "available_doses_per_cap")
+gov <- c("stringency_index", "Government.Effectiveness.Index.Rank", "CPI.score.2020..Corruption.Index.")
+other <- c("Flu.Vax.Value", "available_doses_per_cap")
 
 #############################################
 # for up to the 25th percentile
@@ -121,7 +124,7 @@ Q_FIN <- Q_FIN %>%
            "mean.Q4","sd.Q4")) %>%
   mutate(across(3:10, round, 2))
 Q_FIN[11,-c(1,2)] <- as.integer(Q_FIN[11,-c(1,2)])
-Q_FIN[18,c(3,4)] <- "NA"
+Q_FIN[19,c(3,4)] <- "NA"
 Q_FIN$pred <- c("Health Expenditure per Capita (USD)","Nurses and midwives per 1,000 people.",  
                 "Physicians per 1,000 People", "Hospital Beds per 1,000 People",
                 "GDP per Capita (USD)",  "Poverty Headcount Ratio at 5.50USD a day (% population)", 
@@ -130,8 +133,8 @@ Q_FIN$pred <- c("Health Expenditure per Capita (USD)","Nurses and midwives per 1
                 "Gender Parity Index","Refugee Population by country or territory of Asylum", 
                 "Gender Inequality Index", "Ethnic Fractionalization Index", "Linguistic Fractionalization Index", 
                 "Religious Fractionalization Index", "Transparency and Corruption Index",
-                     "Government Stringency Index", "% of population aged 65+ Vaccinated against Influenza", "Government Effectiveness",
-                "Available doses per Capita")
+                     "Government Stringency Index",  "Government Effectiveness", 
+                "% of population aged 65+ Vaccinated against Influenza", "Available doses per Capita")
 row.names(Q_FIN) <- NULL
 
 htmlTable(Q_FIN,
@@ -141,14 +144,31 @@ htmlTable(Q_FIN,
             "Std", "Mean", "Std"),
           rnames = FALSE,
           rgroup = c("Health System", "General Socioeconomic Status", "Education",
-                     "Social/Cultural","Governance"),
-          n.rgroup = c(4,3,2,6,5),
+                     "Social/Cultural","Governance", "Other"),
+          n.rgroup = c(4,3,2,6,3,2),
           cgroup = c("","< 25th Percentile", "25th-50th Percentile", 
                      "50th-75th Percentile", "> 75th Percentile"),
           n.cgroup = c(2,2,2,2,2)) %>%
   save_kable(file = "plots/split_vax.pdf")
 
 
-                         
-                         
+
+D1 <- datQ1[,2]
+D2 <- datQ2[,2]
+D3 <- datQ3[,2]
+D4 <- datQ4[,2]
+n <- max(length(D1), length(D2), length(D3), length(D4))
+length(D1) <- n                      
+length(D2) <- n
+length(D3) <- n
+length(D4) <- n
+Q_count <- data.frame(cbind(D1, D2, D3, D4))
+colnames(Q_count) <- c("< 25th Percentile", "25th-50th Percentile", 
+                     "50th-75th Percentile", "> 75th Percentile")
+row.names(Q_count) <- NULL
+
+a <- tableGrob(Q_count)
+grid.draw(a)
+
+
                          

@@ -182,7 +182,15 @@ euroCoords$value <- europeUnionTable$value[match(euroCoords$region,europeUnionTa
 
 region.lab.data <- euroCoords[,-4] %>%
   group_by(region) %>%
-  summarise(long = mean(long), lat = mean(lat))
+  summarise(long = mean(long), lat = mean(lat)) %>%
+  filter(region %in% c('United Kingdom','France','Germany','Kazakhstan','Sweden','Ukraine','Bosnia and Herz','Turkey','Hungary','Poland','Lithuania',
+                       'Spain','Italy','Israel','Iceland','Finland','Turkmenistan','Tajikistan','Greece','Croatia','Serbia','Andorra','Estonia','Belarus',
+                       'Georgia','Uzebekistan','Kyrgyzstan','Netherlands')) %>%
+  rbind(c('Russia',65.105951,58.5067))
+
+region.lab.data[2:3] <- lapply(region.lab.data[2:3], as.numeric)
+
+
 
 map_plot <- ggplot() +
   geom_polygon(data = euroCoords,
@@ -190,7 +198,7 @@ map_plot <- ggplot() +
                colour = "black", size = 0.3)+
   scale_fill_gradient2(low = "#cc0000",
                        mid = '#3366ff',
-                       high = "#3366ff",
+                       high = "black",
                        midpoint = 70,
                        limits = c(0,100))+
   theme(#panel.grid.minor = element_line(colour = NA), panel.grid.minor = element_line(colour = NA),
@@ -206,10 +214,13 @@ map_plot <- ggplot() +
   coord_map(xlim = c(-20, 80),  ylim = c(32, 71))+
   labs(x = '', y = '', title = '',
        fill = 'Vaccination Rate (%)')+
-  geom_text(aes(x = long, y = lat, label = region),
+  geom_label(aes(x = long, y = lat, label = region),
             data = region.lab.data,
-            size = 3,
-            hjust = 0.5)
+            size = 2.75,
+            check_overlap = TRUE,
+            nudge_y = 0.8) +
+  geom_point(aes(x = long, y = lat),
+             data = region.lab.data)
 map_plot
 
 aspect_ratio <- 2.5
@@ -222,10 +233,6 @@ ggsave(
   dpi = 'print',
   height = 5 , width = 8
 )
-
-
-
-
 
 # #############################end###################################
 # 

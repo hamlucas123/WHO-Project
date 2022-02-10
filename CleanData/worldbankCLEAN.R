@@ -6,7 +6,7 @@ library(readr)
 library(readxl)
 
 
-df <- read.csv('data/rawdata/country-level-predictors.csv')
+df <- read.csv('data/country-level-predictors.csv')
 
 # replacing all ".." with NA
 df[df==".."] <- NA

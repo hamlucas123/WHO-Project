@@ -26,6 +26,9 @@ install.packages("lemon")
 
 ```
 ## Initial setup
+Please refer to the Analysis section to see which scripts to run.
+
+
 To run the script:
 1. Set working directory to source file location
 2. Select all code and press run
@@ -34,11 +37,13 @@ To run the script:
 
 This project aims to identify the most important country-level predictors that could reduce COVID-19 mortality and morbidity, one of four vaccination programme goals set by WHO. This can be achieved by increasing COVID-19 vaccine uptake and increasing coverage in vulnerable groups within the countries of the European region, as identified by WHO. The list of EU region countries can be found from: https://www.euro.who.int/en/countries. The three highest-priority groups identified by WHO include: Older adults, Healthcare workers, and Long-term care facilities residents.
 
-This repository contains information needed to identify these predictors. The information has been divided into different folders and are as follows:
+This repository contains information needed to identify these predictors and the outputs of relevant scripts. The information has been divided into different folders and are as follows:
 1. metadata
 2. data
 3. CleanData
 4. Analysis
+5. plots
+6. tables
 
 
 ## Metadata
@@ -86,17 +91,48 @@ This folder holds the scripts used to clean the raw data from sources. Also in t
 
 
 ## Analysis
-This folder holds the scripts used to perform 
+This folder holds the scripts used to perform the analysis. 
 1. Modelling.R
 
-//  
+- Used to plot scatter plots between each of the potential country-level predictors and the outcome variable (proportion of fully vaccinated in the general population).
+- Performs multiple univariable beta regression analysis between each potential predictor and outcome.
+- Runs a correlation matrix among potential predictors and plots it.
+- Runs a multivariable beta regression model with all potential predictors and calculates VIF andn tolerance scores (to determine multicollinearity).
+- Searches for the best model by performing an exhaustive subset search among all covariates (given no multicollinearity) and ranks models based on R-Squared statistic.
+- Runs likelihood ratio tests among the top 10 models to choose the final one. 
 2. predictEDA.R
-// summary table, mean and standard deviation for each selected country-level predictor 
+-  Tabulated country-level predictors according to quartiles of fully vaccinated countries 
+-  For each country-level predictor, the number of countries included is shown. The mean and standard deviation are also calculated for each quartile.
+-  Table of countries in each quartile produced 
 3. subpop_plots.R
-//
+- Used to produce correlation matrices between the subpopulations and the predictors.
+- Graphs showing the correlations between Older Adults and COVID vaccination uptake is alson in this script.
 4. vaccineEDA.R
+- Summary statistics for vaccination
+- Table of vaccination rates across WHO Europe countries
+- Bar chart of vaccination rate in vulnerable populations
+- World map figure of vaccination rate across WHO Europe countries
 
+## Plots
+This folder contains the graphical outputs from scripts in the Analysis folder.
+1. Country_Quartile.png
+2. euro_grid.png
+3. euro_grid_70.png
+4. map_plot.png
+5. split_vax.pdf
+6. table.html
+7. vax_bar.png
+8. vax_scatter.png
+9. vul_plot_grid.png
+10. vul_po.png
+11. vul_pop_grid.png
+12. vul_pop_plot.png
 
-
+## Table
+This folder contains the correlation tables provided by the subpop_plot.R script from the Analysis folder.
+1. Correlation table Health Care Workers.csv
+2. Correlation table LTCF.csv
+3. Correlation table Older Adults.csv
+4. Merge Corr table.csv
 
 

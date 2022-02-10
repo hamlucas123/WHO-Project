@@ -23,7 +23,10 @@ install.packages("extrafont")
 install.packages("ggpubr")
 install.packages("geofacet")
 install.packages("lemon")
-
+install.packages("readr")
+install.packages("readxl")
+install.packages("lubridate")
+install.packages("gridExtra")
 ```
 ## Initial setup
 Please refer to the Analysis section to see which scripts to run.

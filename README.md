@@ -38,7 +38,7 @@ To run the script:
 
 ## Introduction
 
-This project aims to identify the most important country-level predictors that could reduce COVID-19 mortality and morbidity, one of four vaccination programme goals set by WHO. This can be achieved by increasing COVID-19 vaccine uptake and increasing coverage in vulnerable groups within the countries of the European region, as identified by WHO. The list of EU region countries can be found from: https://www.euro.who.int/en/countries. The three highest-priority groups identified by WHO include: Older adults, Healthcare workers, and Long-term care facilities residents.
+This project aims to identify the most important country-level predictors that could reduce COVID-19 mortality and morbidity, one of four vaccination programme goals set by WHO. This can be achieved by increasing COVID-19 vaccine uptake and increasing coverage in vulnerable groups within the countries of the European region, as identified by WHO. The list of EU region countries can be found from: https://www.euro.who.int/en/countries. The highest-priority groups identified by WHO include: Older adults, Healthcare workers due to their increased risk of mortality; this project will also look into Long-term care facilities residents, a high-risk group identified by ECDC.
 
 This repository contains information needed to identify these predictors and the outputs of relevant scripts. The information has been divided into different folders and are as follows:
 1. metadata

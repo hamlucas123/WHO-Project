@@ -56,7 +56,7 @@ This folder holds the script used to generate the comma-separated value file con
 2. metadata.csv
 
 ## Data
-This folder holds all the raw data collected from various data sources, and the merged dataset. Data sources used: The World Bank, EU CDC, Our World in Data (OWID), Organisation for Economic Co-operation and Development (OECD), United Nations Educational Scientific and Cultural Organisation (UNESCO), United Nations Development Programme (UNDP), World Population Review, Luxembourg Income Study database.
+This folder holds all the raw data collected from various data sources, and the merged dataset. Data sources used: The World Bank, EU CDC, Our World in Data (OWID), Organisation for Economic Co-operation and Development (OECD), United Nations Educational Scientific and Cultural Organisation (UNESCO), United Nations Development Programme (UNDP), World Population Review, Luxembourg Income Study database, The Worldwide Governance Indicator (WGI), The World Population Review, Transparency International.
 
 1. OWD_child.csv
 2. OWD_flu65.csv
